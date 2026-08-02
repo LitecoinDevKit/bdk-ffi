@@ -332,6 +332,8 @@ fn test_add_foreign_utxo_validates_non_witness_utxo_when_witness_utxo_is_present
             value: BdkAmount::from_sat(50_000),
             script_pubkey: BdkScriptBuf::new(),
         }],
+        mw_tx: None,
+        is_hog_ex: false,
     };
     let non_witness_utxo = Arc::new(Transaction::new(serialize(&non_witness_tx)).unwrap());
 

@@ -1,4 +1,4 @@
-package org.bitcoindevkit
+package org.litecoindevkit
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.test.platform.app.InstrumentationRegistry

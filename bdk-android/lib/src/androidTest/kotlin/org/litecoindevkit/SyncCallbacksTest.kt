@@ -1,4 +1,4 @@
-package org.bitcoindevkit
+package org.litecoindevkit
 
 import android.util.Log
 import kotlin.test.Test

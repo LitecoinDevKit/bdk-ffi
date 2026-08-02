@@ -20,7 +20,6 @@ use bdk_wallet::descriptor::DescriptorError as BdkDescriptorError;
 use bdk_wallet::error::BuildFeeBumpError;
 use bdk_wallet::error::CreateTxError as BdkCreateTxError;
 use bdk_wallet::keys::bip39::Error as BdkBip39Error;
-use bdk_wallet::migration::PreV1MigrationError as BdkPreV1MigrationError;
 use bdk_wallet::miniscript::descriptor::DescriptorKeyParseError as BdkDescriptorKeyParseError;
 use bdk_wallet::miniscript::psbt::Error as BdkPsbtFinalizeError;
 use bdk_wallet::signer::SignerError as BdkSignerError;
@@ -159,11 +158,51 @@ pub enum CannotConnectError {
     Include { height: u32 },
 }
 
+/// Errors from the MWEB facade and `bdk_mweb` crypto/sync helpers.
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 #[uniffi::export(Debug, Display)]
-pub enum CbfError {
-    #[error("the node is no longer running")]
-    NodeStopped,
+pub enum MwebError {
+    #[error("no unspent MWEB coins")]
+    NoMwebCoins,
+
+    #[error("insufficient MWEB funds: needed {needed}, available {available}")]
+    InsufficientMwebFunds { needed: u64, available: u64 },
+
+    #[error("create tx: {error_message}")]
+    CreateTx { error_message: String },
+
+    #[error("mweb: {error_message}")]
+    Mweb { error_message: String },
+
+    #[error("sqlite: {error_message}")]
+    Sqlite { error_message: String },
+}
+
+impl From<bdk_wallet::mweb::MwebFacadeError> for MwebError {
+    fn from(value: bdk_wallet::mweb::MwebFacadeError) -> Self {
+        use bdk_wallet::mweb::MwebFacadeError as E;
+        match value {
+            E::NoMwebCoins => MwebError::NoMwebCoins,
+            E::InsufficientMwebFunds { needed, available } => MwebError::InsufficientMwebFunds {
+                needed: needed.to_sat(),
+                available: available.to_sat(),
+            },
+            E::CreateTx(e) => MwebError::CreateTx {
+                error_message: e.to_string(),
+            },
+            E::Mweb(e) => MwebError::Mweb {
+                error_message: e.to_string(),
+            },
+        }
+    }
+}
+
+impl From<bdk_mweb::Error> for MwebError {
+    fn from(value: bdk_mweb::Error) -> Self {
+        MwebError::Mweb {
+            error_message: value.to_string(),
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
@@ -1101,6 +1140,9 @@ impl From<BdkCreateTxError> for CreateTxError {
             BdkCreateTxError::MiniscriptPsbt(e) => CreateTxError::MiniscriptPsbt {
                 error_message: e.to_string(),
             },
+            other => CreateTxError::Descriptor {
+                error_message: other.to_string(),
+            },
         }
     }
 }
@@ -1397,20 +1439,10 @@ impl From<BdkSqliteError> for PersistenceError {
     }
 }
 
-impl From<BdkPreV1MigrationError> for PreV1MigrationError {
-    fn from(error: BdkPreV1MigrationError) -> Self {
-        match error {
-            BdkPreV1MigrationError::RusqliteError(error) => PreV1MigrationError::Sqlite {
-                error_message: error.to_string(),
-            },
-            BdkPreV1MigrationError::InvalidKeychain(keychain) => {
-                PreV1MigrationError::InvalidKeychain { keychain }
-            }
-            BdkPreV1MigrationError::InvalidChecksum(error) => {
-                PreV1MigrationError::InvalidChecksum {
-                    error_message: error.to_string(),
-                }
-            }
+impl From<bdk_wallet::rusqlite::Error> for PreV1MigrationError {
+    fn from(error: bdk_wallet::rusqlite::Error) -> Self {
+        PreV1MigrationError::Sqlite {
+            error_message: error.to_string(),
         }
     }
 }
@@ -1688,8 +1720,3 @@ impl From<BdkEncodeError> for TransactionError {
     }
 }
 
-impl From<bdk_kyoto::bip157::ClientError> for CbfError {
-    fn from(_value: bdk_kyoto::bip157::ClientError) -> Self {
-        CbfError::NodeStopped
-    }
-}

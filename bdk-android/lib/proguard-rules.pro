@@ -23,6 +23,6 @@
 # for JNA
 -dontwarn java.awt.*
 -keep class com.sun.jna.* { *; }
--keep class org.bitcoindevkit.* { *; }
--keepclassmembers class * extends org.bitcoindevkit.* { public *; }
+-keep class org.litecoindevkit.* { *; }
+-keepclassmembers class * extends org.litecoindevkit.* { public *; }
 -keepclassmembers class * extends com.sun.jna.* { public *; }

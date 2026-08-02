@@ -17,7 +17,7 @@ use std::sync::Arc;
 const EXTERNAL_DESCRIPTOR: &str = "wpkh(tprv8ZgxMBicQKsPf2qfrEygW6fdYseJDDrVnDv26PH5BHdvSuG6ecCbHqLVof9yZcMoM31z9ur3tTYbSnr1WBqbGX97CbXcmp5H6qeMpyvx35B/84h/1h/1h/0/*)";
 const INTERNAL_DESCRIPTOR: &str = "wpkh(tprv8ZgxMBicQKsPf2qfrEygW6fdYseJDDrVnDv26PH5BHdvSuG6ecCbHqLVof9yZcMoM31z9ur3tTYbSnr1WBqbGX97CbXcmp5H6qeMpyvx35B/84h/1h/1h/1/*)";
 const TWO_PATH_DESCRIPTOR: &str = "wpkh([9a6a2580/84'/1'/0']tpubDDnGNapGEY6AZAdQbfRJgMg9fvz8pUBrLwvyvUqEgcUfgzM6zc2eVK4vY9x9L5FJWdX8WumXuLEDV5zDZnTfbn87vLe9XceCFwTu9so9Kks/<0;1>/*)";
-const EXPECTED_FIRST_ADDRESS: &str = "tb1qhjys9wxlfykmte7ftryptx975uqgd6kcm6a7z4";
+const EXPECTED_FIRST_ADDRESS: &str = "tltc1qhjys9wxlfykmte7ftryptx975uqgd6kczjlqju";
 
 fn external_descriptor() -> Arc<Descriptor> {
     Arc::new(Descriptor::new(EXTERNAL_DESCRIPTOR.to_string(), NetworkKind::Test).unwrap())
@@ -70,6 +70,8 @@ fn funded_wallet() -> Wallet {
             value: BdkAmount::from_sat(76_000),
             script_pubkey: address.script_pubkey().0.clone(),
         }],
+        mw_tx: None,
+        is_hog_ex: false,
     };
     let txid = funding_tx.compute_txid();
     let mut update = bdk_wallet::Update::default();
@@ -286,6 +288,8 @@ fn test_sign_with_signers_for_public_wallet() {
             value: BdkAmount::from_sat(76_000),
             script_pubkey: address.script_pubkey().0.clone(),
         }],
+        mw_tx: None,
+        is_hog_ex: false,
     };
     let txid = funding_tx.compute_txid();
     let mut update = bdk_wallet::Update::default();

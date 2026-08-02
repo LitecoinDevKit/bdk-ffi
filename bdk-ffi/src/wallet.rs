@@ -361,11 +361,27 @@ impl Wallet {
         persister: Arc<Persister>,
         params: LoadParams,
     ) -> Result<Wallet, LoadWithPersistError> {
-        let descriptor = two_path_descriptor.to_string();
         let mut persist_lock = persister.inner.lock().unwrap();
         let deref = persist_lock.deref_mut();
 
-        let bdk_params = BdkWallet::load().two_path_descriptor(descriptor);
+        // Litecoin fork LoadParams has no `two_path_descriptor` helper. Expand the
+        // multipath descriptor into its two single-path descriptors and check those.
+        let singles = two_path_descriptor
+            .extended_descriptor
+            .clone()
+            .into_single_descriptors()
+            .map_err(|e| LoadWithPersistError::InvalidChangeSet {
+                error_message: e.to_string(),
+            })?;
+        if singles.len() != 2 {
+            return Err(LoadWithPersistError::InvalidChangeSet {
+                error_message: "two-path descriptor must expand to exactly 2 descriptors"
+                    .to_string(),
+            });
+        }
+        let bdk_params = BdkWallet::load()
+            .descriptor(KeychainKind::External, Some(singles[0].clone()))
+            .descriptor(KeychainKind::Internal, Some(singles[1].clone()));
         let bdk_params = params.apply_to(bdk_params);
 
         let wallet: PersistedWallet<PersistenceType> = bdk_params
@@ -578,15 +594,9 @@ impl Wallet {
         &self,
         unconfirmed_txs: Vec<UnconfirmedTx>,
     ) -> Vec<WalletEvent> {
-        self.get_wallet()
-            .apply_unconfirmed_txs_events(
-                unconfirmed_txs
-                    .into_iter()
-                    .map(|utx| (Arc::new(utx.tx.as_ref().into()), utx.last_seen)),
-            )
-            .into_iter()
-            .map(|event| event.into())
-            .collect()
+        // Event-returning variant not yet in the Litecoin wallet fork; apply and return no events.
+        self.apply_unconfirmed_txs(unconfirmed_txs);
+        Vec::new()
     }
 
     /// Apply transactions that have been evicted from the mempool.
@@ -612,15 +622,9 @@ impl Wallet {
     /// [`apply_evicted_txs`]: Self::apply_evicted_txs
     /// [`apply_update_events`]: Self::apply_update_events
     pub fn apply_evicted_txs_events(&self, evicted_txs: Vec<EvictedTx>) -> Vec<WalletEvent> {
-        self.get_wallet()
-            .apply_evicted_txs_events(
-                evicted_txs
-                    .into_iter()
-                    .map(|etx| (etx.txid.0, etx.evicted_at)),
-            )
-            .into_iter()
-            .map(|event| event.into())
-            .collect()
+        // Event-returning variant not yet in the Litecoin wallet fork; apply and return no events.
+        self.apply_evicted_txs(evicted_txs);
+        Vec::new()
     }
 
     /// The derivation index of this wallet. It will return `None` if it has not derived any addresses.
@@ -720,19 +724,28 @@ impl Wallet {
         signers: Vec<Arc<SignersContainer>>,
         sign_options: Option<SignOptions>,
     ) -> Result<bool, SignerError> {
+        // Litecoin fork has no `Wallet::sign_with_signers`; drive the provided
+        // signer containers directly, then finalize via the wallet.
+        use bdk_wallet::bitcoin::key::Secp256k1;
+
         let mut psbt = psbt.0.lock().unwrap();
         let bdk_sign_options: BdkSignOptions = match sign_options {
             Some(sign_options) => BdkSignOptions::from(sign_options),
             None => BdkSignOptions::default(),
         };
-        let signers = signers
-            .iter()
-            .map(|container| &container.inner)
-            .collect::<Vec<_>>();
-
-        self.get_wallet()
-            .sign_with_signers(&mut psbt, &signers, bdk_sign_options)
-            .map_err(SignerError::from)
+        let secp = Secp256k1::new();
+        for container in &signers {
+            for signer in container.inner.signers() {
+                signer.sign_transaction(&mut psbt, &bdk_sign_options, &secp)?;
+            }
+        }
+        if bdk_sign_options.try_finalize {
+            self.get_wallet()
+                .finalize_psbt(&mut psbt, bdk_sign_options)
+                .map_err(SignerError::from)
+        } else {
+            Ok(false)
+        }
     }
 
     /// Finalize a PSBT, i.e., for each input determine if sufficient data is available to pass
@@ -778,7 +791,7 @@ impl Wallet {
     /// Iterate over the transactions in the wallet.
     pub fn transactions(&self) -> Vec<CanonicalTx> {
         self.get_wallet()
-            .transactions_sort_by(|tx1, tx2| tx2.chain_position.cmp(&tx1.chain_position))
+            .transactions_sort_by(|tx1, tx2| tx2.pos.cmp(&tx1.pos))
             .into_iter()
             .map(|tx| tx.into())
             .collect()

@@ -1,4 +1,4 @@
-package org.bitcoindevkit
+package org.litecoindevkit
 
 import kotlin.test.Test
 import kotlin.test.assertFails

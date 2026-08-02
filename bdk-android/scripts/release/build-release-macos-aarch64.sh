@@ -1,11 +1,21 @@
 #!/bin/bash
 
-if [ -z "$ANDROID_NDK_ROOT" ]; then
-    echo "Error: ANDROID_NDK_ROOT is not defined in your environment"
-    exit 1
+if [ -z "${ANDROID_NDK_ROOT:-}" ]; then
+    if [ -n "${ANDROID_NDK_HOME:-}" ]; then
+        ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+    elif [ -d "/opt/homebrew/share/android-ndk" ]; then
+        ANDROID_NDK_ROOT="/opt/homebrew/share/android-ndk"
+    else
+        echo "Error: ANDROID_NDK_ROOT is not defined in your environment"
+        exit 1
+    fi
 fi
 
-PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64/bin:$PATH"
+NDK_HOST_TAG="darwin-x86_64"
+if [ ! -d "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/$NDK_HOST_TAG" ]; then
+    NDK_HOST_TAG="darwin-arm64"
+fi
+PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/$NDK_HOST_TAG/bin:$PATH"
 CFLAGS="-D__ANDROID_MIN_SDK_VERSION__=24"
 AR="llvm-ar"
 LIB_NAME="libbdkffi.so"

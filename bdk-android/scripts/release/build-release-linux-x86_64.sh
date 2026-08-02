@@ -1,8 +1,14 @@
 #!/bin/bash
 
-if [ -z "$ANDROID_NDK_ROOT" ]; then
-    echo "Error: ANDROID_NDK_ROOT is not defined in your environment"
-    exit 1
+if [ -z "${ANDROID_NDK_ROOT:-}" ]; then
+    if [ -n "${ANDROID_NDK_HOME:-}" ]; then
+        ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+    elif [ -d "/opt/homebrew/share/android-ndk" ]; then
+        ANDROID_NDK_ROOT="/opt/homebrew/share/android-ndk"
+    else
+        echo "Error: ANDROID_NDK_ROOT is not defined in your environment"
+        exit 1
+    fi
 fi
 
 PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"

@@ -106,10 +106,11 @@ impl From<OutPoint> for BdkOutPoint {
 ///
 /// If you are concerned about forward compatibility, consider using T: Into<Params> instead of this
 /// type as a parameter to functions in your public API, or directly using the Params type.
+/// Litecoin network. Variant names match rust-litecoin / `bdk_wallet::bitcoin::Network`
+/// (Bitcoin == Litecoin mainnet; there is no separate `Testnet` — use `Testnet4`).
 #[uniffi::remote(Enum)]
 pub enum Network {
     Bitcoin,
-    Testnet,
     Testnet4,
     Signet,
     Regtest,
@@ -1178,6 +1179,7 @@ impl TryFrom<Input> for BdkInput {
             tap_merkle_root,
             proprietary,
             unknown,
+            mweb: Default::default(),
         })
     }
 }

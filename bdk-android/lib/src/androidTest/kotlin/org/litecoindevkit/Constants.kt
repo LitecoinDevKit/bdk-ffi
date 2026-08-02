@@ -1,4 +1,4 @@
-package org.bitcoindevkit
+package org.litecoindevkit
 
 // Test networks
 const val TEST_EXTENDED_PRIVKEY = "tprv8ZgxMBicQKsPf2qfrEygW6fdYseJDDrVnDv26PH5BHdvSuG6ecCbHqLVof9yZcMoM31z9ur3tTYbSnr1WBqbGX97CbXcmp5H6qeMpyvx35B"

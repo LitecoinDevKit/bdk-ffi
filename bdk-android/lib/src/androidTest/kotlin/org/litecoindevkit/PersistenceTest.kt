@@ -1,4 +1,4 @@
-package org.bitcoindevkit
+package org.litecoindevkit
 
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File

@@ -1,15 +1,17 @@
 #!/bin/bash
+# Dev build of LitecoinDevKit xcframework (macOS + iOS device + iOS sim).
+# Requires full Xcode with iPhoneOS / iPhoneSimulator SDKs installed.
 
 set -euo pipefail
 
-HEADER_BASENAME="BitcoinDevKitFFI"
+HEADER_BASENAME="LitecoinDevKitFFI"
 TARGETDIR="../bdk-ffi/target"
 OUTDIR="."
-NAME="bdkffi"
-STATIC_LIB_NAME="lib${NAME}.a"
+NAME="bdkFFI"
+STATIC_LIB_NAME="libbdkffi.a"
 NEW_HEADER_DIR="../bdk-ffi/target/include"
 PROFILE_DIR="debug"
-SWIFT_OUT_DIR="../bdk-swift/Sources/BitcoinDevKit"
+SWIFT_OUT_DIR="../bdk-swift/Sources/LitecoinDevKit"
 HEADER_OUT_DIR="${NEW_HEADER_DIR}/${HEADER_BASENAME}"
 MIN_IOS_VERSION="15.0"
 
@@ -34,18 +36,13 @@ cargo build --package bdk-ffi --target "$MAC_TARGET"
 cargo build --package bdk-ffi --target "$IOS_SIM_TARGET"
 cargo build --package bdk-ffi --target "$IOS_DEVICE_TARGET"
 
-UNIFFI_LIBRARY_PATH="./target/$IOS_DEVICE_TARGET/$PROFILE_DIR/lib${NAME}.dylib"
+UNIFFI_LIBRARY_PATH="./target/$MAC_TARGET/$PROFILE_DIR/libbdkffi.dylib"
 cargo run --bin uniffi-bindgen generate \
     --library "${UNIFFI_LIBRARY_PATH}" \
     --language swift \
     --out-dir "${SWIFT_OUT_DIR}" \
     --no-format
 
-# Final xcframework structure (per-arch):
-#   Headers/
-#     <ModuleName>/
-#       <ModuleName>.h
-#       module.modulemap
 rm -rf "${NEW_HEADER_DIR:?}"/*
 rm -rf "${HEADER_OUT_DIR:?}"
 mkdir -p "${HEADER_OUT_DIR}"
@@ -55,17 +52,14 @@ cargo run --bin uniffi-bindgen generate \
     --out-dir "${HEADER_OUT_DIR}" \
     --no-format
 
-# Keep the header output directory clean: xcframework headers should only contain .h + module.modulemap
 find "${HEADER_OUT_DIR}" -maxdepth 1 -name '*.swift' -delete
 
-# Uniffi emits <basename>.modulemap; rename it to module.modulemap (expected by Apple toolchains)
 if [ -f "${HEADER_OUT_DIR}/${HEADER_BASENAME}.modulemap" ]; then
     mv "${HEADER_OUT_DIR}/${HEADER_BASENAME}.modulemap" "${HEADER_OUT_DIR}/module.modulemap"
 fi
 
 echo -e "\n" >> "${HEADER_OUT_DIR}/module.modulemap"
 
-# Keep Swift sources clean: only .swift files should stay in the package Sources dir
 rm -f "${SWIFT_OUT_DIR}/${HEADER_BASENAME}.h"
 rm -f "${SWIFT_OUT_DIR}/${HEADER_BASENAME}.modulemap"
 

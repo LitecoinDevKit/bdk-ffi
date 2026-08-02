@@ -158,7 +158,7 @@ fn test_descriptor_derive_address() {
     );
 
     let derived = descriptor
-        .derive_address(0, Network::Testnet)
+        .derive_address(0, Network::Testnet4)
         .expect("derive address");
 
     let expected_descriptor = descriptor
@@ -166,7 +166,7 @@ fn test_descriptor_derive_address() {
         .at_derivation_index(0)
         .expect("derive descriptor");
     let expected_address = expected_descriptor
-        .address(Network::Testnet)
+        .address(Network::Testnet4)
         .expect("address from descriptor");
 
     assert_eq!(derived.to_string(), expected_address.to_string());
@@ -180,7 +180,7 @@ fn test_descriptor_derive_address_multipath_error() {
     )
     .expect("multipath descriptor parses");
 
-    let error = descriptor.derive_address(0, Network::Testnet).unwrap_err();
+    let error = descriptor.derive_address(0, Network::Testnet4).unwrap_err();
 
     assert_matches!(error, DescriptorError::MultiPath);
 }

@@ -10,12 +10,11 @@ use bdk_wallet::chain::spk_client::SyncItem;
 use bdk_wallet::chain::BlockId as BdkBlockId;
 use bdk_wallet::chain::Merge;
 
-use bdk_wallet::bitcoin::Transaction as BdkTransaction;
 use bdk_wallet::chain::spk_client::FullScanRequest as BdkFullScanRequest;
 use bdk_wallet::chain::spk_client::FullScanRequestBuilder as BdkFullScanRequestBuilder;
 use bdk_wallet::chain::spk_client::SyncRequest as BdkSyncRequest;
 use bdk_wallet::chain::spk_client::SyncRequestBuilder as BdkSyncRequestBuilder;
-use bdk_wallet::chain::tx_graph::CanonicalTx as BdkCanonicalTx;
+use bdk_wallet::chain::CanonicalTx as BdkCanonicalTx;
 use bdk_wallet::chain::{
     ChainPosition as BdkChainPosition, ConfirmationBlockTime as BdkConfirmationBlockTime,
 };
@@ -170,11 +169,11 @@ pub struct CanonicalTx {
     pub chain_position: ChainPosition,
 }
 
-impl From<BdkCanonicalTx<'_, Arc<BdkTransaction>, BdkConfirmationBlockTime>> for CanonicalTx {
-    fn from(tx: BdkCanonicalTx<'_, Arc<BdkTransaction>, BdkConfirmationBlockTime>) -> Self {
+impl From<BdkCanonicalTx<BdkChainPosition<BdkConfirmationBlockTime>>> for CanonicalTx {
+    fn from(tx: BdkCanonicalTx<BdkChainPosition<BdkConfirmationBlockTime>>) -> Self {
         CanonicalTx {
-            transaction: Arc::new(Transaction::from(tx.tx_node.tx.as_ref().clone())),
-            chain_position: tx.chain_position.into(),
+            transaction: Arc::new(Transaction::from(tx.tx.as_ref().clone())),
+            chain_position: tx.pos.into(),
         }
     }
 }

@@ -77,7 +77,7 @@ fn test_extend_descriptor_keys() {
     let master_dpk: &DescriptorPublicKey = &master_dsk.as_public();
     let extended_dpk: &DescriptorPublicKey = &extend_dpk(master_dpk, "m/0").unwrap();
     assert_eq!(extended_dpk.to_string(), "tpubD6NzVbkrYhZ4WywdEfYbbd62yuvqLjAZuPsNyvzCNV85JekAEMbKHWSHLF9h3j45SxewXDcLv328B1SEZrxg4iwGfmdt1pDFjZiTkGiFqGa/0");
-    let wif = "L2wTu6hQrnDMiFNWA5na6jB12ErGQqtXwqpSL7aWquJaZG8Ai3ch";
+    let wif = "T8mjLqzbGABxV61NhijSK5iNy6VaUvuRm3ihBvD4QsUk59ihMbyT";
     let extended_key = DescriptorSecretKey::from_string(wif.to_string()).unwrap();
     let result = extended_key.derive(&DerivationPath::new("m/0".to_string()).unwrap());
     assert!(result.is_err());
@@ -85,7 +85,7 @@ fn test_extend_descriptor_keys() {
 
 #[test]
 fn test_from_str_inner() {
-    let key1 = "L2wTu6hQrnDMiFNWA5na6jB12ErGQqtXwqpSL7aWquJaZG8Ai3ch";
+    let key1 = "T8mjLqzbGABxV61NhijSK5iNy6VaUvuRm3ihBvD4QsUk59ihMbyT";
     let key2 = "tprv8ZgxMBicQKsPcwcD4gSnMti126ZiETsuX7qwrtMypr6FBwAP65puFn4v6c3jrN9VwtMRMph6nyT63NrfUL4C3nBzPcduzVSuHD7zbX2JKVc/1/1/1/*";
     let _private_descriptor_key1 = DescriptorSecretKey::from_string(key1.to_string()).unwrap();
     let _private_descriptor_key2 = DescriptorSecretKey::from_string(key2.to_string()).unwrap();
@@ -96,7 +96,7 @@ fn test_from_str_inner() {
 
 #[test]
 fn test_secret_bytes_from_single_and_multipath_keys() {
-    let wif = "L2wTu6hQrnDMiFNWA5na6jB12ErGQqtXwqpSL7aWquJaZG8Ai3ch";
+    let wif = "T8mjLqzbGABxV61NhijSK5iNy6VaUvuRm3ihBvD4QsUk59ihMbyT";
     let single_key = DescriptorSecretKey::from_string(wif.to_string()).unwrap();
     let expected_single_bytes = BdkPrivateKey::from_wif(wif)
         .unwrap()

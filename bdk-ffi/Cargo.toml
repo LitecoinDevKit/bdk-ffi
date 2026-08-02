@@ -1,10 +1,14 @@
+# Standalone package (not a member of the parent BDK workspace).
+[workspace]
+
 [package]
 name = "bdk-ffi"
-version = "3.1.0-alpha.0"
+version = "3.1.0-litecoin.0"
 homepage = "https://bitcoindevkit.org"
-repository = "https://github.com/bitcoindevkit/bdk"
+repository = "https://github.com/IndigoNakamoto/bdk-ffi"
 edition = "2018"
 license = "MIT OR Apache-2.0"
+description = "UniFFI language bindings for the Litecoin BDK fork (with MWEB)"
 
 [lib]
 crate-type = ["lib", "cdylib", "staticlib"]
@@ -15,10 +19,10 @@ name = "uniffi-bindgen"
 path = "uniffi-bindgen.rs"
 
 [dependencies]
-bdk_wallet = { version = "=3.1.0", features = ["all-keys", "keys-bip39", "rusqlite"] }
-bdk_esplora = { version = "0.22.2", default-features = false, features = ["std", "blocking", "blocking-https-rustls"] }
-bdk_electrum = { version = "0.24.0", default-features = false, features = ["use-rustls-ring"] }
-bdk_kyoto = { version = "0.17.0" }
+bdk_wallet = { path = "../../bdk_wallet", version = "=3.1.0-litecoin.0", features = ["all-keys", "keys-bip39", "rusqlite", "mweb", "mweb-sqlite"] }
+bdk_esplora = { path = "../../crates/esplora", version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls"] }
+bdk_electrum = { path = "../../crates/electrum", version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
+bdk_mweb = { path = "../../crates/mweb", version = "0.1.0", default-features = false, features = ["std", "zkp", "persist", "rusqlite", "lip0006"] }
 
 uniffi = { version = "=0.31.2", features = ["cli"]}
 thiserror = "2.0.17"
@@ -37,3 +41,7 @@ lto = true          # Enable Link Time Optimization
 codegen-units = 1   # Reduce number of codegen units to increase optimizations.
 panic = "abort"     # Abort on panic
 strip = "debuginfo" # Partially strip symbols from binary
+
+# Until crates.io publishes litecoin 0.32.8-rc.2 (native PSBTv2 MWEB maps).
+[patch.crates-io]
+litecoin = { git = "https://github.com/IndigoNakamoto/rust-litecoin.git", branch = "mweb-psbt-typed-maps" }

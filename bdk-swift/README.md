@@ -1,52 +1,56 @@
-# bdk-swift
+# LitecoinDevKit (bdk-swift)
 
-This project builds a Swift package that provides [Swift] language bindings for the
-[BDK] libraries. The Swift language bindings are created by the [`bdk-ffi`] project which is included as a module of this repository.
+Swift language bindings for the Litecoin BDK fork (with MWEB), generated via [UniFFI](https://mozilla.github.io/uniffi-rs/) from [`bdk-ffi`](../bdk-ffi).
 
-Supported target platforms are:
+Supported targets (when built with full Xcode):
 
-- macOS, X86_64 and M1 (aarch64)
-- iOS, iPhones (aarch64)
-- iOS simulator, X86_64 and M1 (aarch64)
+- macOS (Apple Silicon / Intel)
+- iOS device (`aarch64-apple-ios`)
+- iOS simulator (`aarch64-apple-ios-sim`)
 
-## How to Use
-
-To use the Swift language bindings for [BDK] in your [Xcode] iOS or macOS project add
-the GitHub repository https://github.com/bitcoindevkit/bdk-swift and select one of the
-release versions. You may then import and use the `BitcoinDevKit` library in your Swift
-code. For example:
+## Package name
 
 ```swift
-import BitcoinDevKit
-
-...
-
+import LitecoinDevKit
 ```
 
-Swift Package Manager releases for `bdk-swift` are published to a separate repository (https://github.com/bitcoindevkit/bdk-swift), and that is where the releases are created for it.
+Maven-style coordinates for the sister Android package: `org.litecoindevkit:bdk-ltc-android`.
 
-The `bdk-swift/build-xcframework.sh` script can be used instead to create a version of the project for local testing.
+## Build locally
 
-### How to test
+### Prerequisites
+
+- Rust toolchain (see `bdk-ffi/rust-toolchain.toml`)
+- For **iOS device/simulator slices**: full **Xcode.app** (not only Command Line Tools), with iPhoneOS / iPhoneSimulator SDKs:
+  ```shell
+  sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+  ```
+- For a **macOS-only** smoke framework (no iOS SDK):
+  ```shell
+  cd bdk-swift
+  bash ./build-xcframework-macos-only.sh
+  ```
+
+### Full xcframework (macOS + iOS + sim)
 
 ```shell
+cd bdk-swift
+bash ./build-xcframework-dev.sh
 swift test
 ```
 
-### Example Projects
+## MWEB smoke
 
-- [BDKSwiftExampleWallet](https://github.com/bitcoindevkit/BDKSwiftExampleWallet), iOS
+See [`Examples/MwebSmoke/main.swift`](Examples/MwebSmoke/main.swift) and
+[`Tests/LitecoinDevKitTests/MwebSmokeTests.swift`](Tests/LitecoinDevKitTests/MwebSmokeTests.swift).
 
-## How to Build and Publish
+Core APIs:
 
-If you are a maintainer of this project or want to build and publish this project to your
-own GitHub repository use the following steps:
+- `MasterKeys.fromSeed` / `receiveAddress`
+- `MwebStore` / `Wallet.balanceCombined`
+- `Wallet.prepareMwebPegin` / `fundMwebSend` / `fundMwebPegout` / `signAndExtractFundedMweb`
+- `MwebSyncer` (blocking; call off the main thread)
 
-1. If it doesn't already exist, create a new `release/0.MINOR` branch from the `master` branch.
-2. Add a tag `vMAJOR.MINOR.PATCH`.
-3. Run the `publish-spm` workflow on GitHub from the `bdk-swift` repo for version `MAJOR.MINOR.PATCH`.
+## Note on this machine
 
-[Swift]: https://developer.apple.com/swift/
-[Xcode]: https://developer.apple.com/documentation/Xcode
-[`BDK`]: https://github.com/bitcoindevkit/
-[`bdk-ffi`]: https://github.com/bitcoindevkit/bdk-ffi
+If `xcodebuild` reports that only Command Line Tools are active, iOS SDK builds will fail until Xcode is installed and selected. Android bindings do not require Xcode.

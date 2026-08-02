@@ -11,8 +11,8 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-group = "org.bitcoindevkit"
-version = "3.1.0-SNAPSHOT"
+group = "org.litecoindevkit"
+version = "3.1.0-litecoin.0-SNAPSHOT"
 
 android {
     namespace = group.toString()
@@ -62,19 +62,19 @@ dependencies {
 mavenPublishing {
     coordinates(
         groupId = group.toString(),
-        artifactId = "bdk-android",
+        artifactId = "bdk-ltc-android",
         version = version.toString()
     )
 
     pom {
-        name.set("bdk-android")
-        description.set("Bitcoin Dev Kit language bindings for Android.")
-        url.set("https://bitcoindevkit.org")
+        name.set("bdk-ltc-android")
+        description.set("Litecoin Dev Kit (BDK fork with MWEB) language bindings for Android.")
+        url.set("https://github.com/IndigoNakamoto/bdk-ffi")
         inceptionYear.set("2021")
         licenses {
             license {
                 name.set("APACHE 2.0")
-                url.set("https://github.com/bitcoindevkit/bdk/blob/master/LICENSE-APACHE")
+                url.set("https://github.com/IndigoNakamoto/bdk/blob/master/LICENSE-APACHE")
             }
             license {
                 name.set("MIT")

@@ -4,8 +4,8 @@ mod electrum;
 mod error;
 mod esplora;
 mod keys;
-mod kyoto;
 mod macros;
+mod mweb;
 mod signer;
 mod store;
 mod tx_builder;
@@ -15,7 +15,6 @@ mod wallet;
 #[cfg(test)]
 mod tests;
 
-use crate::bitcoin::FeeRate;
 use crate::bitcoin::OutPoint;
 
 uniffi::setup_scaffolding!("bdk");
