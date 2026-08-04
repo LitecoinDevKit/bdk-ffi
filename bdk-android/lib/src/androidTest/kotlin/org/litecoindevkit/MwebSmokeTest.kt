@@ -20,7 +20,7 @@ class MwebSmokeTest {
     @Test
     fun combinedBalanceOnEmptyWallet() {
         val mnemonic = Mnemonic.fromString(
-            "space echo position soft dizzy revise inflict damaged swallow bid thunder expend"
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
         )
         val secret = DescriptorSecretKey(NetworkKind.TEST, mnemonic, null)
         val descriptor = Descriptor.newBip84(secret, KeychainKind.EXTERNAL, NetworkKind.TEST)

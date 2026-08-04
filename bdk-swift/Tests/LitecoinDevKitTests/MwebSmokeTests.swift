@@ -20,7 +20,7 @@ final class MwebSmokeTests: XCTestCase {
     }
 
     func testCombinedBalanceOnEmptyWallet() throws {
-        let mnemonic = try Mnemonic.fromString(mnemonic: "space echo position soft dizzy revise inflict damaged swallow bid thunder expend")
+        let mnemonic = try Mnemonic.fromString(mnemonic: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about")
         let descriptor = try Descriptor.newBip84(
             secretKey: DescriptorSecretKey(networkKind: .test, mnemonic: mnemonic, password: nil),
             keychainKind: .external,
