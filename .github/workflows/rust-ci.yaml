@@ -1,17 +1,19 @@
 name: Rust Continuous Integration
 
-# Continuous integration for the Rust bdk-ffi layer.
-# Builds, tests, and runs clippy linting on the Rust code.
-# Ensures code formatting follows project standards using rustfmt.
-# Runs on changes to bdk-ffi directory on pushes and pull requests.
+# Continuous integration for the Rust bdk-ffi layer of the Litecoin BDK fork.
+# The crate depends on path deps into the IndigoNakamoto/bdk monorepo, so the
+# setup-workspace action first reconstructs the nested checkout layout.
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "bdk-ffi/**"
+      - ".github/**"
   pull_request:
     paths:
       - "bdk-ffi/**"
+      - ".github/**"
 
 permissions: {}
 
@@ -19,46 +21,42 @@ jobs:
   test:
     name: "Run tests"
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: bdk-ffi
 
     steps:
       - name: "Checkout"
         uses: actions/checkout@v5
         with:
           persist-credentials: false
+
+      - name: "Set up Litecoin BDK workspace"
+        uses: ./.github/actions/setup-workspace
 
       - name: "Set up Rust"
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
 
-      - name: "Check Cargo.lock"
-        run: |
-          if ! cargo check --locked; then
-            echo "::error::Cargo.lock is stale. Run 'cargo generate-lockfile'."
-            exit 1
-          fi
-
       - name: "Build"
+        working-directory: bdk/bdk-ffi/bdk-ffi
         run: cargo build
 
       - name: "Test"
-        run: CLASSPATH=./tests/jna/jna-5.14.0.jar cargo test --features uniffi/bindgen-tests
+        working-directory: bdk/bdk-ffi/bdk-ffi
+        run: cargo test
 
   check:
     name: "Run clippy and fmt"
     needs: test
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: bdk-ffi
+
     steps:
       - name: "Checkout"
         uses: actions/checkout@v5
         with:
           persist-credentials: false
+
+      - name: "Set up Litecoin BDK workspace"
+        uses: ./.github/actions/setup-workspace
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -66,7 +64,9 @@ jobs:
           components: clippy, rustfmt
 
       - name: "Check fmt"
+        working-directory: bdk/bdk-ffi/bdk-ffi
         run: cargo fmt --all -- --config format_code_in_doc_comments=true --check
 
       - name: "Check clippy"
-        run: cargo clippy --all-targets --features "uniffi/bindgen-tests"
+        working-directory: bdk/bdk-ffi/bdk-ffi
+        run: cargo clippy --all-targets

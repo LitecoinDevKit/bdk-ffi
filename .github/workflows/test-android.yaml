@@ -1,7 +1,12 @@
 name: Test Android
 
-# Tests the Android bindings for bdk-ffi on an Android emulator.
-# Builds Rust binaries, sets up Android emulator, and runs the connected tests.
+# Builds the Android bindings for the Litecoin bdk-ffi fork:
+# cross-compiles the Rust native libraries for all supported ABIs,
+# generates the Kotlin bindings, and assembles the release AAR.
+#
+# Note: upstream's emulator-based connected tests ran against a Bitcoin
+# regtest container; they are disabled here until a Litecoin regtest
+# image is available.
 
 on:
   workflow_dispatch:
@@ -9,38 +14,28 @@ on:
     paths:
       - "bdk-ffi/**"
       - "bdk-android/**"
+      - ".github/**"
   pull_request:
     paths:
       - "bdk-ffi/**"
       - "bdk-android/**"
+      - ".github/**"
 
 permissions: {}
 
 jobs:
-  test:
-    name: "Test Android library"
+  build:
+    name: "Build Android library"
     runs-on: ubuntu-24.04
 
-    services:
-      bitcoin-regtest:
-        image: ghcr.io/thunderbiscuit/podman-regtest-infinity-pro:0.4.0
-        ports:
-          - 18443:18443
-          - 18444:18444
-          - 3002:3002
-          - 60401:60401
-        # The container initialization step will wait until everything is ready before allowing other steps to run
-        options: >-
-          --health-cmd "test $(bitcoin-cli -regtest -rpcuser=regtest -rpcpassword=password getblockcount) -gt 100"
-          --health-interval 3s
-          --health-timeout 5s
-          --health-retries 20
-
     steps:
-      - name: "Checkout PR branch"
+      - name: "Checkout"
         uses: actions/checkout@v5
         with:
           persist-credentials: false
+
+      - name: "Set up Litecoin BDK workspace"
+        uses: ./.github/actions/setup-workspace
 
       - name: "Set up JDK"
         uses: actions/setup-java@v4
@@ -52,6 +47,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: "Set up Android NDK"
+        id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26c
@@ -61,32 +57,18 @@ jobs:
         with:
           cache: false
 
-      - name: "Build Android library"
-        run: |
-          cd bdk-android
-          bash ./scripts/release/build-release-linux-x86_64.sh
+      - name: "Build native libraries and Kotlin bindings"
+        working-directory: bdk/bdk-ffi/bdk-android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: bash ./scripts/release/build-release-linux-x86_64.sh
 
-      - name: "Free Disk Space (Ubuntu)"
-        uses: AdityaGarg8/remove-unwanted-software@v5
+      - name: "Assemble release AAR"
+        working-directory: bdk/bdk-ffi/bdk-android
+        run: ./gradlew :lib:assembleRelease --console=plain
+
+      - name: "Upload AAR artifact"
+        uses: actions/upload-artifact@v4
         with:
-          remove-dotnet: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-          remove-large-packages: false
-
-      - name: "Enable KVM"
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: "Run Android connected tests"
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          profile: Nexus 6
-          emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot"
-          script: cd bdk-android && ./gradlew connectedAndroidTest --console=plain
+          name: bdk-ltc-android-aar
+          path: bdk/bdk-ffi/bdk-android/lib/build/outputs/aar/*.aar

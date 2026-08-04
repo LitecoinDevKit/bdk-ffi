@@ -3,14 +3,14 @@
 # The results of this script can be used for locally testing your SPM package adding a local package
 # to your application pointing at the bdk-swift directory.
 
-HEADER_BASENAME="BitcoinDevKitFFI"
+HEADER_BASENAME="LitecoinDevKitFFI"
 TARGETDIR="../bdk-ffi/target"
 OUTDIR="."
 RELDIR="release-smaller"
 NAME="bdkffi"
 STATIC_LIB_NAME="lib${NAME}.a"
 NEW_HEADER_DIR="../bdk-ffi/target/include"
-SWIFT_OUT_DIR="../bdk-swift/Sources/BitcoinDevKit"
+SWIFT_OUT_DIR="../bdk-swift/Sources/LitecoinDevKit"
 HEADER_OUT_DIR="${NEW_HEADER_DIR}/${HEADER_BASENAME}"
 MIN_IOS_VERSION="15.0"
 
@@ -34,7 +34,8 @@ cargo build --package bdk-ffi --profile release-smaller --target aarch64-apple-i
 cargo build --package bdk-ffi --profile release-smaller --target aarch64-apple-ios-sim
 
 # build bdk-ffi Swift bindings and put in bdk-swift Sources
-UNIFFI_LIBRARY_PATH="./target/aarch64-apple-ios/${RELDIR}/lib${NAME}.dylib"
+# (use the macOS host dylib for bindgen; contents are target-independent)
+UNIFFI_LIBRARY_PATH="./target/aarch64-apple-darwin/${RELDIR}/lib${NAME}.dylib"
 cargo run --bin uniffi-bindgen generate --library "${UNIFFI_LIBRARY_PATH}" --language swift --out-dir "${SWIFT_OUT_DIR}" --no-format
 
 # Final xcframework structure (per-arch):

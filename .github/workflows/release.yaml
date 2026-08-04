@@ -1,0 +1,147 @@
+name: Build Release Artifacts
+
+# Manually-triggered release pipeline for the Litecoin bdk-ffi fork.
+# Produces the artifacts other developers consume:
+#   - bdk-ltc-android AAR (Kotlin bindings + native libs for all ABIs)
+#   - bdkFFI.xcframework.zip (all Apple targets) + its SwiftPM checksum
+#   - a Package.swift pre-filled with the release URL and checksum
+#
+# When a version is supplied, a draft GitHub release is created with the
+# artifacts attached. To finish a Swift release: commit the generated
+# Package.swift to the repo, tag that commit with the same version, and
+# publish the draft release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 3.1.0-litecoin.0). Leave empty for a dry run (artifacts only)."
+        required: false
+        default: ""
+
+permissions: {}
+
+jobs:
+  android:
+    name: "Build Android AAR"
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: "Set up Litecoin BDK workspace"
+        uses: ./.github/actions/setup-workspace
+
+      - name: "Set up JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: "Set up Android SDK"
+        uses: android-actions/setup-android@v3
+
+      - name: "Set up Android NDK"
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26c
+
+      - name: "Set up Rust"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+
+      - name: "Build native libraries and Kotlin bindings"
+        working-directory: bdk/bdk-ffi/bdk-android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: bash ./scripts/release/build-release-linux-x86_64.sh
+
+      - name: "Assemble release AAR"
+        working-directory: bdk/bdk-ffi/bdk-android
+        run: ./gradlew :lib:assembleRelease --console=plain
+
+      - name: "Rename AAR"
+        working-directory: bdk/bdk-ffi/bdk-android
+        run: cp lib/build/outputs/aar/lib-release.aar bdk-ltc-android.aar
+
+      - name: "Upload AAR artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdk-ltc-android-aar
+          path: bdk/bdk-ffi/bdk-android/bdk-ltc-android.aar
+
+  swift:
+    name: "Build Swift xcframework"
+    runs-on: macos-15
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: "Set up Litecoin BDK workspace"
+        uses: ./.github/actions/setup-workspace
+
+      - name: "Set up Rust"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+
+      - name: "Build xcframework"
+        working-directory: bdk/bdk-ffi/bdk-swift
+        run: bash ./build-xcframework.sh
+
+      - name: "Zip xcframework and compute checksum"
+        working-directory: bdk/bdk-ffi/bdk-swift
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+          zip -9 -r bdkFFI.xcframework.zip bdkFFI.xcframework
+          CHECKSUM=$(swift package compute-checksum bdkFFI.xcframework.zip)
+          echo "xcframework checksum: $CHECKSUM"
+          # Generate a Package.swift pointing at the release asset URL.
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${VERSION:-VERSION}/bdkFFI.xcframework.zip"
+          sed -e "s|BDKFFIURL|${URL}|" -e "s|BDKFFICHECKSUM|${CHECKSUM}|" Package.swift.txt > Package.swift.release
+          cat Package.swift.release
+
+      - name: "Upload xcframework artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdkffi-xcframework
+          path: |
+            bdk/bdk-ffi/bdk-swift/bdkFFI.xcframework.zip
+            bdk/bdk-ffi/bdk-swift/Package.swift.release
+            bdk/bdk-ffi/bdk-swift/Sources/LitecoinDevKit/LitecoinDevKit.swift
+
+  release:
+    name: "Create draft GitHub release"
+    if: ${{ github.event.inputs.version != '' }}
+    needs: [android, swift]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: "Download artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: "Create draft release"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "$VERSION" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft \
+            --title "$VERSION" \
+            --notes "Litecoin BDK bindings $VERSION (MWEB). See README for usage." \
+            artifacts/bdk-ltc-android-aar/bdk-ltc-android.aar \
+            artifacts/bdkffi-xcframework/bdkFFI.xcframework.zip \
+            artifacts/bdkffi-xcframework/Package.swift.release
