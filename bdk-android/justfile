@@ -6,7 +6,7 @@
 [group("Repo")]
 [doc("Open repo on GitHub in your default browser.")]
 repo:
-  open https://github.com/IndigoNakamoto/bdk-ffi
+  open https://github.com/LitecoinDevKit/bdk-ffi
 
 [group("Repo")]
 [doc("Build the API docs.")]

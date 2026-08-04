@@ -69,12 +69,12 @@ mavenPublishing {
     pom {
         name.set("bdk-ltc-android")
         description.set("Litecoin Dev Kit (BDK fork with MWEB) language bindings for Android.")
-        url.set("https://github.com/IndigoNakamoto/bdk-ffi")
+        url.set("https://github.com/LitecoinDevKit/bdk-ffi")
         inceptionYear.set("2021")
         licenses {
             license {
                 name.set("APACHE 2.0")
-                url.set("https://github.com/IndigoNakamoto/bdk/blob/master/LICENSE-APACHE")
+                url.set("https://github.com/LitecoinDevKit/bdk/blob/master/LICENSE-APACHE")
             }
             license {
                 name.set("MIT")

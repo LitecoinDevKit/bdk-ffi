@@ -5,7 +5,7 @@
 name = "bdk-ffi"
 version = "3.1.0-litecoin.1"
 homepage = "https://bitcoindevkit.org"
-repository = "https://github.com/IndigoNakamoto/bdk-ffi"
+repository = "https://github.com/LitecoinDevKit/bdk-ffi"
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "UniFFI language bindings for the Litecoin BDK fork (with MWEB)"
@@ -24,10 +24,10 @@ path = "uniffi-bindgen.rs"
 # otherwise Cargo builds two copies of bdk_chain/bdk_mweb and types stop
 # unifying. For local development, add [patch] overrides in .cargo/config.toml
 # pointing at sibling checkouts (see README).
-bdk_wallet = { git = "https://github.com/IndigoNakamoto/bdk_wallet.git", rev = "5118184083a2451f49996324f132dfe05c8a8318", version = "=3.1.0-litecoin.0", features = ["all-keys", "keys-bip39", "rusqlite", "mweb", "mweb-sqlite"] }
-bdk_esplora = { git = "https://github.com/IndigoNakamoto/bdk.git", rev = "312d0d566a264637c9a7ddfb85d7673a8f351a26", version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls"] }
-bdk_electrum = { git = "https://github.com/IndigoNakamoto/bdk.git", rev = "312d0d566a264637c9a7ddfb85d7673a8f351a26", version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
-bdk_mweb = { git = "https://github.com/IndigoNakamoto/bdk.git", rev = "312d0d566a264637c9a7ddfb85d7673a8f351a26", version = "0.1.0", default-features = false, features = ["std", "zkp", "persist", "rusqlite", "lip0006"] }
+bdk_wallet = { git = "https://github.com/LitecoinDevKit/bdk_wallet.git", rev = "c0c26dafeea11160f42fce2faf164101191c3912", version = "=3.1.0-litecoin.0", features = ["all-keys", "keys-bip39", "rusqlite", "mweb", "mweb-sqlite"] }
+bdk_esplora = { git = "https://github.com/LitecoinDevKit/bdk.git", rev = "85eb2a996fbc2569746497b2ad87aff3704f06ca", version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls"] }
+bdk_electrum = { git = "https://github.com/LitecoinDevKit/bdk.git", rev = "85eb2a996fbc2569746497b2ad87aff3704f06ca", version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
+bdk_mweb = { git = "https://github.com/LitecoinDevKit/bdk.git", rev = "85eb2a996fbc2569746497b2ad87aff3704f06ca", version = "0.1.0", default-features = false, features = ["std", "zkp", "persist", "rusqlite", "lip0006"] }
 
 uniffi = { version = "=0.31.2", features = ["cli"]}
 thiserror = "2.0.17"
@@ -50,4 +50,4 @@ strip = "debuginfo" # Partially strip symbols from binary
 # Until crates.io publishes litecoin 0.32.8-rc.2 (native PSBTv2 MWEB maps).
 # Must stay on the same rev the bdk fork pins, so litecoin types unify.
 [patch.crates-io]
-litecoin = { git = "https://github.com/IndigoNakamoto/rust-litecoin.git", rev = "0b3285337f3cc508a5549d245ce20d3b52418f3a" }
+litecoin = { git = "https://github.com/LitecoinDevKit/rust-litecoin.git", rev = "0b3285337f3cc508a5549d245ce20d3b52418f3a" }

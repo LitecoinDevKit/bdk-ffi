@@ -1,6 +1,6 @@
 # Litecoin bdk-ffi
 
-UniFFI language bindings for the [Litecoin BDK fork](https://github.com/IndigoNakamoto/bdk) (with MWEB support), targeting Swift (iOS/macOS) and Kotlin (Android).
+UniFFI language bindings for the [Litecoin BDK fork](https://github.com/LitecoinDevKit/bdk) (with MWEB support), targeting Swift (iOS/macOS) and Kotlin (Android).
 
 Forked from [bitcoindevkit/bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) and rewired to:
 
@@ -19,14 +19,14 @@ Forked from [bitcoindevkit/bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) an
 
 ## Using the bindings (no Rust required)
 
-Prebuilt artifacts are published on the [GitHub releases page](https://github.com/IndigoNakamoto/bdk-ffi/releases/tag/3.1.0-litecoin.1):
+Prebuilt artifacts are published on the [GitHub releases page](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.1):
 
 - **Android** — download `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
   `implementation(files("libs/bdk-ltc-android.aar"))` plus
   `implementation("net.java.dev.jna:jna:5.14.0@aar")`. Kotlin package: `org.litecoindevkit`.
 - **Swift** — add the SwiftPM package
-  [`IndigoNakamoto/ltc-swift`](https://github.com/IndigoNakamoto/ltc-swift)
-  (`.package(url: "https://github.com/IndigoNakamoto/ltc-swift", from: "3.1.0-litecoin.1")`).
+  [`LitecoinDevKit/ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift)
+  (`.package(url: "https://github.com/LitecoinDevKit/ltc-swift", from: "3.1.0-litecoin.1")`).
   The binary `bdkFFI.xcframework.zip` (iOS device + simulator + macOS) is hosted on the
   bdk-ffi release; `ltc-swift` is the thin Package.swift + generated bindings wrapper.
 
@@ -36,14 +36,14 @@ checksum, and a ready-to-commit `Package.swift.release`.
 
 ## Building from source
 
-The fork dependencies ([`IndigoNakamoto/bdk`](https://github.com/IndigoNakamoto/bdk),
-[`bdk_wallet`](https://github.com/IndigoNakamoto/bdk_wallet),
-[`rust-litecoin`](https://github.com/IndigoNakamoto/rust-litecoin)) are rev-pinned git
+The fork dependencies ([`LitecoinDevKit/bdk`](https://github.com/LitecoinDevKit/bdk),
+[`bdk_wallet`](https://github.com/LitecoinDevKit/bdk_wallet),
+[`rust-litecoin`](https://github.com/LitecoinDevKit/rust-litecoin)) are rev-pinned git
 dependencies in [`bdk-ffi/Cargo.toml`](bdk-ffi/Cargo.toml) with a committed `Cargo.lock`,
 so a plain clone builds standalone:
 
 ```shell
-git clone --branch litecoin-mweb https://github.com/IndigoNakamoto/bdk-ffi.git
+git clone --branch litecoin-mweb https://github.com/LitecoinDevKit/bdk-ffi.git
 ```
 
 The `bdk.git` rev pinned here must match the one the pinned `bdk_wallet` commit pins in
@@ -65,13 +65,13 @@ To hack on `bdk`/`bdk_wallet` and this crate together without pushing pins, clon
 siblings of this repo and add a gitignored `.cargo/config.toml` at the repo root:
 
 ```toml
-[patch."https://github.com/IndigoNakamoto/bdk.git"]
+[patch."https://github.com/LitecoinDevKit/bdk.git"]
 bdk_electrum = { path = "../bdk/crates/electrum" }
 bdk_esplora = { path = "../bdk/crates/esplora" }
 bdk_mweb = { path = "../bdk/crates/mweb" }
 bdk_chain = { path = "../bdk/crates/chain" }
 
-[patch."https://github.com/IndigoNakamoto/bdk_wallet.git"]
+[patch."https://github.com/LitecoinDevKit/bdk_wallet.git"]
 bdk_wallet = { path = "../bdk_wallet" }
 ```
 
@@ -127,7 +127,7 @@ let addr = try keys.receiveAddress(index: 0, network: .bitcoin)
    and creates a draft GitHub release with the artifacts attached.
 2. Publish the draft release so the `bdkFFI.xcframework.zip` asset URL becomes public.
 3. For Swift consumers via SwiftPM URL: update
-   [`IndigoNakamoto/ltc-swift`](https://github.com/IndigoNakamoto/ltc-swift) with
+   [`LitecoinDevKit/ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift) with
    `Package.swift.release` (renamed to `Package.swift`) plus
    `Sources/LitecoinDevKit/LitecoinDevKit.swift` from the workflow artifacts, and tag it
    with the release version.
