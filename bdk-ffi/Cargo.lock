@@ -149,6 +149,7 @@ dependencies = [
 [[package]]
 name = "bdk_chain"
 version = "0.23.2"
+source = "git+https://github.com/IndigoNakamoto/bdk.git?rev=312d0d566a264637c9a7ddfb85d7673a8f351a26#312d0d566a264637c9a7ddfb85d7673a8f351a26"
 dependencies = [
  "bdk_core",
  "litecoin",
@@ -160,6 +161,7 @@ dependencies = [
 [[package]]
 name = "bdk_core"
 version = "0.6.2"
+source = "git+https://github.com/IndigoNakamoto/bdk.git?rev=312d0d566a264637c9a7ddfb85d7673a8f351a26#312d0d566a264637c9a7ddfb85d7673a8f351a26"
 dependencies = [
  "hashbrown 0.14.5",
  "litecoin",
@@ -169,6 +171,7 @@ dependencies = [
 [[package]]
 name = "bdk_electrum"
 version = "0.23.2"
+source = "git+https://github.com/IndigoNakamoto/bdk.git?rev=312d0d566a264637c9a7ddfb85d7673a8f351a26#312d0d566a264637c9a7ddfb85d7673a8f351a26"
 dependencies = [
  "bdk_core",
  "electrum-client",
@@ -177,6 +180,7 @@ dependencies = [
 [[package]]
 name = "bdk_esplora"
 version = "0.22.1"
+source = "git+https://github.com/IndigoNakamoto/bdk.git?rev=312d0d566a264637c9a7ddfb85d7673a8f351a26#312d0d566a264637c9a7ddfb85d7673a8f351a26"
 dependencies = [
  "bdk_core",
  "esplora-client",
@@ -186,6 +190,7 @@ dependencies = [
 [[package]]
 name = "bdk_mweb"
 version = "0.1.0"
+source = "git+https://github.com/IndigoNakamoto/bdk.git?rev=312d0d566a264637c9a7ddfb85d7673a8f351a26#312d0d566a264637c9a7ddfb85d7673a8f351a26"
 dependencies = [
  "bdk_core",
  "blake3",
@@ -202,6 +207,7 @@ dependencies = [
 [[package]]
 name = "bdk_wallet"
 version = "3.1.0-litecoin.0"
+source = "git+https://github.com/IndigoNakamoto/bdk_wallet.git?rev=5118184083a2451f49996324f132dfe05c8a8318#5118184083a2451f49996324f132dfe05c8a8318"
 dependencies = [
  "bdk_chain",
  "bdk_mweb",
@@ -736,7 +742,7 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 [[package]]
 name = "litecoin"
 version = "0.32.8-rc.2"
-source = "git+https://github.com/IndigoNakamoto/rust-litecoin.git?branch=mweb-psbt-typed-maps#0b3285337f3cc508a5549d245ce20d3b52418f3a"
+source = "git+https://github.com/IndigoNakamoto/rust-litecoin.git?rev=0b3285337f3cc508a5549d245ce20d3b52418f3a#0b3285337f3cc508a5549d245ce20d3b52418f3a"
 dependencies = [
  "base58ck",
  "base64 0.21.7",

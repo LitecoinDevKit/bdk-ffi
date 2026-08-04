@@ -198,8 +198,8 @@ impl MwebStore {
     /// Load from a SQLite file path (creates tables if missing).
     #[uniffi::constructor]
     pub fn load_sqlite(path: String) -> Result<Self, MwebError> {
-        let mut conn = bdk_wallet::rusqlite::Connection::open(&path)
-            .map_err(|e| MwebError::Sqlite {
+        let mut conn =
+            bdk_wallet::rusqlite::Connection::open(&path).map_err(|e| MwebError::Sqlite {
                 error_message: e.to_string(),
             })?;
         let tx = conn.transaction().map_err(|e| MwebError::Sqlite {
@@ -219,8 +219,8 @@ impl MwebStore {
     /// Persist staged mutations into a SQLite file path.
     pub fn persist_sqlite(&self, path: String) -> Result<(), MwebError> {
         let mut store = self.inner.lock().unwrap();
-        let mut conn = bdk_wallet::rusqlite::Connection::open(&path)
-            .map_err(|e| MwebError::Sqlite {
+        let mut conn =
+            bdk_wallet::rusqlite::Connection::open(&path).map_err(|e| MwebError::Sqlite {
                 error_message: e.to_string(),
             })?;
         let tx = conn.transaction().map_err(|e| MwebError::Sqlite {
@@ -245,10 +245,7 @@ impl MwebStore {
         f(store.db())
     }
 
-    pub(crate) fn with_db_mut<R>(
-        &self,
-        f: impl FnOnce(&mut bdk_mweb::MwebCoinDatabase) -> R,
-    ) -> R {
+    pub(crate) fn with_db_mut<R>(&self, f: impl FnOnce(&mut bdk_mweb::MwebCoinDatabase) -> R) -> R {
         let mut store = self.inner.lock().unwrap();
         f(store.db_mut())
     }
@@ -371,10 +368,9 @@ impl SyncState {
     /// Restore a sync cursor persisted with [`SyncState::to_json`].
     #[uniffi::constructor]
     pub fn from_json(json: String) -> Result<Self, MwebError> {
-        let state: BdkSyncState =
-            serde_json::from_str(&json).map_err(|e| MwebError::Mweb {
-                error_message: format!("sync state json: {e}"),
-            })?;
+        let state: BdkSyncState = serde_json::from_str(&json).map_err(|e| MwebError::Mweb {
+            error_message: format!("sync state json: {e}"),
+        })?;
         Ok(Self {
             inner: Mutex::new(state),
         })
@@ -700,13 +696,7 @@ impl Wallet {
         let wallet = self.get_wallet();
         let params = MwebSpendParams::new(amount.0, fee.0, change_index);
         let funded = store.with_db(|db| {
-            wallet.fund_mweb_pegout(
-                db,
-                &keys.inner,
-                script_pubkey.0.clone(),
-                params,
-                &secp,
-            )
+            wallet.fund_mweb_pegout(db, &keys.inner, script_pubkey.0.clone(), params, &secp)
         })?;
         Ok(Arc::new(FundedMwebPsbt {
             inner: Mutex::new(funded),
@@ -780,7 +770,10 @@ mod tests {
         let via_seed = MasterKeys::from_seed(mnemonic.to_seed(None), network).unwrap();
         let secp = Secp256k1::new();
         assert_eq!(
-            via_mnemonic.inner.address(0, NetworkKind::Test, &secp).unwrap(),
+            via_mnemonic
+                .inner
+                .address(0, NetworkKind::Test, &secp)
+                .unwrap(),
             via_seed.inner.address(0, NetworkKind::Test, &secp).unwrap(),
         );
 
@@ -800,7 +793,10 @@ mod tests {
             MasterKeys::from_mnemonic(mnemonic, Some("hunter2".to_string()), None, network)
                 .unwrap();
         assert_ne!(
-            with_passphrase.inner.address(0, NetworkKind::Test, &secp).unwrap(),
+            with_passphrase
+                .inner
+                .address(0, NetworkKind::Test, &secp)
+                .unwrap(),
             via_seed.inner.address(0, NetworkKind::Test, &secp).unwrap(),
         );
     }

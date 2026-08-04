@@ -6,6 +6,9 @@ name: Build Release Artifacts
 #   - bdkFFI.xcframework.zip (all Apple targets) + its SwiftPM checksum
 #   - a Package.swift pre-filled with the release URL and checksum
 #
+# All fork dependencies are rev-pinned git deps in bdk-ffi/Cargo.toml (with a
+# committed Cargo.lock), so the build is reproducible from this checkout alone.
+#
 # When a version is supplied, a draft GitHub release is created with the
 # artifacts attached. To finish a Swift release: commit the generated
 # Package.swift to the repo, tag that commit with the same version, and
@@ -31,8 +34,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Set up Litecoin BDK workspace"
-        uses: ./.github/actions/setup-workspace
+      - name: "Check dependency rev coherence"
+        run: bash ./scripts/check-rev-coherence.sh
 
       - name: "Set up JDK"
         uses: actions/setup-java@v4
@@ -55,24 +58,24 @@ jobs:
           cache: false
 
       - name: "Build native libraries and Kotlin bindings"
-        working-directory: bdk/bdk-ffi/bdk-android
+        working-directory: bdk-android
         env:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: bash ./scripts/release/build-release-linux-x86_64.sh
 
       - name: "Assemble release AAR"
-        working-directory: bdk/bdk-ffi/bdk-android
+        working-directory: bdk-android
         run: ./gradlew :lib:assembleRelease --console=plain
 
       - name: "Rename AAR"
-        working-directory: bdk/bdk-ffi/bdk-android
+        working-directory: bdk-android
         run: cp lib/build/outputs/aar/lib-release.aar bdk-ltc-android.aar
 
       - name: "Upload AAR artifact"
         uses: actions/upload-artifact@v4
         with:
           name: bdk-ltc-android-aar
-          path: bdk/bdk-ffi/bdk-android/bdk-ltc-android.aar
+          path: bdk-android/bdk-ltc-android.aar
 
   swift:
     name: "Build Swift xcframework"
@@ -83,8 +86,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Set up Litecoin BDK workspace"
-        uses: ./.github/actions/setup-workspace
+      - name: "Check dependency rev coherence"
+        run: bash ./scripts/check-rev-coherence.sh
 
       - name: "Set up Rust"
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -92,11 +95,11 @@ jobs:
           cache: false
 
       - name: "Build xcframework"
-        working-directory: bdk/bdk-ffi/bdk-swift
+        working-directory: bdk-swift
         run: bash ./build-xcframework.sh
 
       - name: "Zip xcframework and compute checksum"
-        working-directory: bdk/bdk-ffi/bdk-swift
+        working-directory: bdk-swift
         env:
           VERSION: ${{ github.event.inputs.version }}
         run: |
@@ -114,9 +117,9 @@ jobs:
         with:
           name: bdkffi-xcframework
           path: |
-            bdk/bdk-ffi/bdk-swift/bdkFFI.xcframework.zip
-            bdk/bdk-ffi/bdk-swift/Package.swift.release
-            bdk/bdk-ffi/bdk-swift/Sources/LitecoinDevKit/LitecoinDevKit.swift
+            bdk-swift/bdkFFI.xcframework.zip
+            bdk-swift/Package.swift.release
+            bdk-swift/Sources/LitecoinDevKit/LitecoinDevKit.swift
 
   release:
     name: "Create draft GitHub release"

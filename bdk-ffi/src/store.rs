@@ -82,7 +82,10 @@ impl Persister {
                 let mut conn_lock = conn.lock().unwrap();
                 let keychains = bdk_get_pre_v1_wallet_keychains(conn_lock.deref_mut())
                     .map_err(PreV1MigrationError::from)?;
-                Ok(keychains.into_iter().map(PreV1WalletKeychain::from).collect())
+                Ok(keychains
+                    .into_iter()
+                    .map(PreV1WalletKeychain::from)
+                    .collect())
             }
             PersistenceType::Custom(_) => Err(PreV1MigrationError::SqliteOnly),
         }

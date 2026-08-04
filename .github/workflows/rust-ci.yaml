@@ -1,18 +1,20 @@
 name: Rust Continuous Integration
 
 # Continuous integration for the Rust bdk-ffi layer of the Litecoin BDK fork.
-# The crate depends on path deps into the IndigoNakamoto/bdk monorepo, so the
-# setup-workspace action first reconstructs the nested checkout layout.
+# All fork dependencies are rev-pinned git deps in bdk-ffi/Cargo.toml, so a
+# plain checkout builds standalone.
 
 on:
   workflow_dispatch:
   push:
     paths:
       - "bdk-ffi/**"
+      - "scripts/**"
       - ".github/**"
   pull_request:
     paths:
       - "bdk-ffi/**"
+      - "scripts/**"
       - ".github/**"
 
 permissions: {}
@@ -28,8 +30,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Set up Litecoin BDK workspace"
-        uses: ./.github/actions/setup-workspace
+      - name: "Check dependency rev coherence"
+        run: bash ./scripts/check-rev-coherence.sh
 
       - name: "Set up Rust"
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -37,12 +39,12 @@ jobs:
           cache: false
 
       - name: "Build"
-        working-directory: bdk/bdk-ffi/bdk-ffi
-        run: cargo build
+        working-directory: bdk-ffi
+        run: cargo build --locked
 
       - name: "Test"
-        working-directory: bdk/bdk-ffi/bdk-ffi
-        run: cargo test
+        working-directory: bdk-ffi
+        run: cargo test --locked
 
   check:
     name: "Run clippy and fmt"
@@ -55,18 +57,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Set up Litecoin BDK workspace"
-        uses: ./.github/actions/setup-workspace
-
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
           components: clippy, rustfmt
 
       - name: "Check fmt"
-        working-directory: bdk/bdk-ffi/bdk-ffi
+        working-directory: bdk-ffi
         run: cargo fmt --all -- --config format_code_in_doc_comments=true --check
 
       - name: "Check clippy"
-        working-directory: bdk/bdk-ffi/bdk-ffi
+        working-directory: bdk-ffi
         run: cargo clippy --all-targets

@@ -1469,7 +1469,9 @@ impl From<bdk_wallet::migration::PreV1MigrationError> for PreV1MigrationError {
             BdkError::RusqliteError(e) => PreV1MigrationError::Sqlite {
                 error_message: e.to_string(),
             },
-            BdkError::InvalidKeychain(keychain) => PreV1MigrationError::InvalidKeychain { keychain },
+            BdkError::InvalidKeychain(keychain) => {
+                PreV1MigrationError::InvalidKeychain { keychain }
+            }
             BdkError::InvalidChecksum(e) => PreV1MigrationError::InvalidChecksum {
                 error_message: e.to_string(),
             },
@@ -1749,4 +1751,3 @@ impl From<BdkEncodeError> for TransactionError {
         }
     }
 }
-

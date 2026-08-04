@@ -34,9 +34,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Set up Litecoin BDK workspace"
-        uses: ./.github/actions/setup-workspace
-
       - name: "Set up JDK"
         uses: actions/setup-java@v4
         with:
@@ -58,17 +55,17 @@ jobs:
           cache: false
 
       - name: "Build native libraries and Kotlin bindings"
-        working-directory: bdk/bdk-ffi/bdk-android
+        working-directory: bdk-android
         env:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: bash ./scripts/release/build-release-linux-x86_64.sh
 
       - name: "Assemble release AAR"
-        working-directory: bdk/bdk-ffi/bdk-android
+        working-directory: bdk-android
         run: ./gradlew :lib:assembleRelease --console=plain
 
       - name: "Upload AAR artifact"
         uses: actions/upload-artifact@v4
         with:
           name: bdk-ltc-android-aar
-          path: bdk/bdk-ffi/bdk-android/lib/build/outputs/aar/*.aar
+          path: bdk-android/lib/build/outputs/aar/*.aar

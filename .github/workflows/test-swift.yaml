@@ -30,18 +30,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Set up Litecoin BDK workspace"
-        uses: ./.github/actions/setup-workspace
-
       - name: "Set up Rust"
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache: false
 
       - name: "Build Swift package"
-        working-directory: bdk/bdk-ffi/bdk-swift
+        working-directory: bdk-swift
         run: bash ./build-xcframework.sh
 
       - name: "Run Swift tests"
-        working-directory: bdk/bdk-ffi/bdk-swift
+        working-directory: bdk-swift
         run: swift test

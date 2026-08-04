@@ -8,12 +8,11 @@ fn test_is_valid_for_network() {
     //   testnet4 bech32 `tltc1`
     //   regtest bech32 `rltc1`
 
-    let mainnet_bech32 =
-        Address::new(
-            "ltc1qsn57m9drscflq5nl76z6ny52hck5w4x52uhpum".to_string(),
-            Network::Bitcoin,
-        )
-        .unwrap();
+    let mainnet_bech32 = Address::new(
+        "ltc1qsn57m9drscflq5nl76z6ny52hck5w4x52uhpum".to_string(),
+        Network::Bitcoin,
+    )
+    .unwrap();
     assert!(mainnet_bech32.is_valid_for_network(Network::Bitcoin));
     assert!(!mainnet_bech32.is_valid_for_network(Network::Testnet4));
     assert!(!mainnet_bech32.is_valid_for_network(Network::Regtest));
@@ -36,15 +35,19 @@ fn test_is_valid_for_network() {
     assert!(!regtest_bech32.is_valid_for_network(Network::Testnet4));
     assert!(regtest_bech32.is_valid_for_network(Network::Regtest));
 
-    let mainnet_p2pkh =
-        Address::new("LctkjnisKKZcvRtLjMMny9u2uKuMbUhXi8".to_string(), Network::Bitcoin)
-            .unwrap();
+    let mainnet_p2pkh = Address::new(
+        "LctkjnisKKZcvRtLjMMny9u2uKuMbUhXi8".to_string(),
+        Network::Bitcoin,
+    )
+    .unwrap();
     assert!(mainnet_p2pkh.is_valid_for_network(Network::Bitcoin));
     assert!(!mainnet_p2pkh.is_valid_for_network(Network::Testnet4));
 
-    let mainnet_p2sh =
-        Address::new("MUuVUXCmKwc71ZC2wS8hX63JfdEARrjSZb".to_string(), Network::Bitcoin)
-            .unwrap();
+    let mainnet_p2sh = Address::new(
+        "MUuVUXCmKwc71ZC2wS8hX63JfdEARrjSZb".to_string(),
+        Network::Bitcoin,
+    )
+    .unwrap();
     assert!(mainnet_p2sh.is_valid_for_network(Network::Bitcoin));
     assert!(!mainnet_p2sh.is_valid_for_network(Network::Testnet4));
 }
