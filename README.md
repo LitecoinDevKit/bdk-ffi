@@ -19,16 +19,16 @@ Forked from [bitcoindevkit/bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) an
 
 ## Using the bindings (no Rust required)
 
-Prebuilt artifacts are published on the [GitHub releases page](https://github.com/IndigoNakamoto/bdk-ffi/releases):
+Prebuilt artifacts are published on the [GitHub releases page](https://github.com/IndigoNakamoto/bdk-ffi/releases/tag/3.1.0-litecoin.0):
 
-- **Android** — `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
+- **Android** — download `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
   `implementation(files("libs/bdk-ltc-android.aar"))` plus
   `implementation("net.java.dev.jna:jna:5.14.0@aar")`. Kotlin package: `org.litecoindevkit`.
-- **Swift** — the binary `bdkFFI.xcframework.zip` (iOS device + simulator + macOS) is
-  attached to each release, together with the generated `LitecoinDevKit.swift` bindings
-  and a `Package.swift` pre-filled with the asset URL and checksum. Until a dedicated
-  SwiftPM publishing repo exists (see "Cutting a release"), either build locally from
-  source (below) or drop those three pieces into your own package.
+- **Swift** — add the SwiftPM package
+  [`IndigoNakamoto/ltc-swift`](https://github.com/IndigoNakamoto/ltc-swift)
+  (`.package(url: "https://github.com/IndigoNakamoto/ltc-swift", from: "3.1.0-litecoin.0")`).
+  The binary `bdkFFI.xcframework.zip` (iOS device + simulator + macOS) is hosted on the
+  bdk-ffi release; `ltc-swift` is the thin Package.swift + generated bindings wrapper.
 
 Releases are produced by the [`Build Release Artifacts`](.github/workflows/release.yaml)
 workflow (`workflow_dispatch`), which builds the AAR, the xcframework zip, its SwiftPM
@@ -114,11 +114,11 @@ let addr = try keys.receiveAddress(index: 0, network: .bitcoin)
    bindings, and a `Package.swift.release` pre-filled with the asset URL and checksum,
    and creates a draft GitHub release with the artifacts attached.
 2. Publish the draft release so the `bdkFFI.xcframework.zip` asset URL becomes public.
-3. For Swift consumers via SwiftPM URL: SwiftPM requires `Package.swift` at the repo
-   root, so (like upstream's `bitcoindevkit/bdk-swift`) maintain a small publishing repo
-   (e.g. `IndigoNakamoto/ltc-swift`) containing `Package.swift.release` (renamed to
-   `Package.swift`) plus `Sources/LitecoinDevKit/LitecoinDevKit.swift` from the workflow
-   artifacts, and tag it with the release version.
+3. For Swift consumers via SwiftPM URL: update
+   [`IndigoNakamoto/ltc-swift`](https://github.com/IndigoNakamoto/ltc-swift) with
+   `Package.swift.release` (renamed to `Package.swift`) plus
+   `Sources/LitecoinDevKit/LitecoinDevKit.swift` from the workflow artifacts, and tag it
+   with the release version.
 
 ## MWEB API (all languages)
 
