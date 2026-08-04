@@ -52,3 +52,6 @@ xcuserdata
 # Python related
 __pycache__
 .localenvironment/
+
+# Local dev [patch] overrides (see README "Local development")
+/.cargo/config.toml

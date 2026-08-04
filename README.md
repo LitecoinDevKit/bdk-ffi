@@ -36,35 +36,47 @@ checksum, and a ready-to-commit `Package.swift.release`.
 
 ## Building from source
 
-The `bdk-ffi` crate uses path dependencies into the Litecoin BDK monorepo, so it must be
-nested inside checkouts of [`IndigoNakamoto/bdk`](https://github.com/IndigoNakamoto/bdk)
-and [`IndigoNakamoto/bdk_wallet`](https://github.com/IndigoNakamoto/bdk_wallet):
+The fork dependencies ([`IndigoNakamoto/bdk`](https://github.com/IndigoNakamoto/bdk),
+[`bdk_wallet`](https://github.com/IndigoNakamoto/bdk_wallet),
+[`rust-litecoin`](https://github.com/IndigoNakamoto/rust-litecoin)) are rev-pinned git
+dependencies in [`bdk-ffi/Cargo.toml`](bdk-ffi/Cargo.toml) with a committed `Cargo.lock`,
+so a plain clone builds standalone:
 
 ```shell
-git clone --branch litecoin https://github.com/IndigoNakamoto/bdk.git
-cd bdk
-git clone --branch litecoin https://github.com/IndigoNakamoto/bdk_wallet.git
 git clone --branch litecoin-mweb https://github.com/IndigoNakamoto/bdk-ffi.git
 ```
 
-Resulting layout (CI reconstructs the same layout via
-[`.github/actions/setup-workspace`](.github/actions/setup-workspace/action.yml)):
-
-```text
-bdk/                 IndigoNakamoto/bdk        (litecoin)
-├── crates/          bdk_chain, bdk_esplora, bdk_electrum, bdk_mweb, ...
-├── bdk_wallet/      IndigoNakamoto/bdk_wallet (litecoin)
-└── bdk-ffi/         this repo                 (litecoin-mweb)
-    └── bdk-ffi/     the Rust crate
-```
+The `bdk.git` rev pinned here must match the one the pinned `bdk_wallet` commit pins in
+its own manifest — otherwise Cargo builds two copies of `bdk_chain`/`bdk_mweb` and types
+stop unifying. [`scripts/check-rev-coherence.sh`](scripts/check-rev-coherence.sh) verifies
+this (CI runs it on every build and release).
 
 ### Rust checks
 
 ```shell
-cd bdk-ffi/bdk-ffi
+cd bdk-ffi
 cargo build
 cargo test
 ```
+
+### Local development against sibling checkouts
+
+To hack on `bdk`/`bdk_wallet` and this crate together without pushing pins, clone them as
+siblings of this repo and add a gitignored `.cargo/config.toml` at the repo root:
+
+```toml
+[patch."https://github.com/IndigoNakamoto/bdk.git"]
+bdk_electrum = { path = "../bdk/crates/electrum" }
+bdk_esplora = { path = "../bdk/crates/esplora" }
+bdk_mweb = { path = "../bdk/crates/mweb" }
+bdk_chain = { path = "../bdk/crates/chain" }
+
+[patch."https://github.com/IndigoNakamoto/bdk_wallet.git"]
+bdk_wallet = { path = "../bdk_wallet" }
+```
+
+Remove it (or `rm .cargo/config.toml`) to build against the pinned revs again. The
+committed manifests always keep the pins.
 
 ### Android
 
