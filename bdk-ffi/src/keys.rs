@@ -59,6 +59,15 @@ impl Mnemonic {
             .map(Mnemonic)
             .map_err(Bip39Error::from)
     }
+
+    /// Derive the 64-byte BIP39 seed for this mnemonic (with optional passphrase).
+    ///
+    /// This is the seed to pass to `MasterKeys.fromSeed` so MWEB keys come from
+    /// the same mnemonic as the transparent descriptors.
+    #[uniffi::method(default(passphrase = None))]
+    pub fn to_seed(&self, passphrase: Option<String>) -> Vec<u8> {
+        self.0.to_seed(passphrase.as_deref().unwrap_or("")).to_vec()
+    }
 }
 
 impl Display for Mnemonic {

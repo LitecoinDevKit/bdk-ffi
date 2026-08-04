@@ -19,14 +19,14 @@ Forked from [bitcoindevkit/bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) an
 
 ## Using the bindings (no Rust required)
 
-Prebuilt artifacts are published on the [GitHub releases page](https://github.com/IndigoNakamoto/bdk-ffi/releases/tag/3.1.0-litecoin.0):
+Prebuilt artifacts are published on the [GitHub releases page](https://github.com/IndigoNakamoto/bdk-ffi/releases/tag/3.1.0-litecoin.1):
 
 - **Android** — download `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
   `implementation(files("libs/bdk-ltc-android.aar"))` plus
   `implementation("net.java.dev.jna:jna:5.14.0@aar")`. Kotlin package: `org.litecoindevkit`.
 - **Swift** — add the SwiftPM package
   [`IndigoNakamoto/ltc-swift`](https://github.com/IndigoNakamoto/ltc-swift)
-  (`.package(url: "https://github.com/IndigoNakamoto/ltc-swift", from: "3.1.0-litecoin.0")`).
+  (`.package(url: "https://github.com/IndigoNakamoto/ltc-swift", from: "3.1.0-litecoin.1")`).
   The binary `bdkFFI.xcframework.zip` (iOS device + simulator + macOS) is hosted on the
   bdk-ffi release; `ltc-swift` is the thin Package.swift + generated bindings wrapper.
 

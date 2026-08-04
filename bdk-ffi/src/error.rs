@@ -176,6 +176,16 @@ pub enum MwebError {
 
     #[error("sqlite: {error_message}")]
     Sqlite { error_message: String },
+
+    /// The peer answered but is rate-limiting LIP-0006 requests. Back off and
+    /// retry later instead of hammering the peer (or rotating to public peers,
+    /// which share the same node-wide budget).
+    #[error("mweb peer throttled: {error_message}")]
+    Throttled { error_message: String },
+
+    /// No LIP-0006 peers were reachable (configured or discovered).
+    #[error("no mweb peers: {error_message}")]
+    NoPeers { error_message: String },
 }
 
 impl From<bdk_wallet::mweb::MwebFacadeError> for MwebError {
@@ -199,6 +209,11 @@ impl From<bdk_wallet::mweb::MwebFacadeError> for MwebError {
 
 impl From<bdk_mweb::Error> for MwebError {
     fn from(value: bdk_mweb::Error) -> Self {
+        if value.ban_reason() == Some(bdk_mweb::BanReason::Throttled) {
+            return MwebError::Throttled {
+                error_message: value.to_string(),
+            };
+        }
         MwebError::Mweb {
             error_message: value.to_string(),
         }
