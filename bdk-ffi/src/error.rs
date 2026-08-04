@@ -1447,6 +1447,21 @@ impl From<bdk_wallet::rusqlite::Error> for PreV1MigrationError {
     }
 }
 
+impl From<bdk_wallet::migration::PreV1MigrationError> for PreV1MigrationError {
+    fn from(error: bdk_wallet::migration::PreV1MigrationError) -> Self {
+        use bdk_wallet::migration::PreV1MigrationError as BdkError;
+        match error {
+            BdkError::RusqliteError(e) => PreV1MigrationError::Sqlite {
+                error_message: e.to_string(),
+            },
+            BdkError::InvalidKeychain(keychain) => PreV1MigrationError::InvalidKeychain { keychain },
+            BdkError::InvalidChecksum(e) => PreV1MigrationError::InvalidChecksum {
+                error_message: e.to_string(),
+            },
+        }
+    }
+}
+
 impl From<bdk_wallet::miniscript::Error> for MiniscriptError {
     fn from(error: bdk_wallet::miniscript::Error) -> Self {
         use bdk_wallet::miniscript::Error as BdkMiniscriptError;

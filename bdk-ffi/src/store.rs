@@ -1,14 +1,12 @@
 use crate::error::{PersistenceError, PreV1MigrationError};
 use crate::types::{ChangeSet, KeychainKind};
 
-use bdk_wallet::bitcoin::hex::{Case, DisplayHex};
 use bdk_wallet::migration::{
-    get_pre_1_wallet_keychains as bdk_get_pre_1_wallet_keychains,
-    Pre1WalletKeychain as BdkPre1WalletKeychain,
+    get_pre_v1_wallet_keychains as bdk_get_pre_v1_wallet_keychains,
+    PreV1WalletKeychain as BdkPreV1WalletKeychain,
 };
 use bdk_wallet::{rusqlite::Connection as BdkConnection, WalletPersister};
 
-use std::convert::TryFrom;
 use std::ops::DerefMut;
 use std::sync::{Arc, Mutex};
 
@@ -82,36 +80,26 @@ impl Persister {
         match lock.deref_mut() {
             PersistenceType::Sql(ref conn) => {
                 let mut conn_lock = conn.lock().unwrap();
-                let keychains = bdk_get_pre_1_wallet_keychains(conn_lock.deref_mut())
+                let keychains = bdk_get_pre_v1_wallet_keychains(conn_lock.deref_mut())
                     .map_err(PreV1MigrationError::from)?;
-                keychains
-                    .into_iter()
-                    .map(PreV1WalletKeychain::try_from)
-                    .collect()
+                Ok(keychains.into_iter().map(PreV1WalletKeychain::from).collect())
             }
             PersistenceType::Custom(_) => Err(PreV1MigrationError::SqliteOnly),
         }
     }
 }
 
-impl TryFrom<BdkPre1WalletKeychain> for PreV1WalletKeychain {
-    type Error = PreV1MigrationError;
-
-    fn try_from(value: BdkPre1WalletKeychain) -> Result<Self, Self::Error> {
-        let keychain = match value.keychain.as_str() {
-            "External" => KeychainKind::External,
-            "Internal" => KeychainKind::Internal,
-            other => {
-                return Err(PreV1MigrationError::InvalidKeychain {
-                    keychain: other.to_string(),
-                })
-            }
+impl From<BdkPreV1WalletKeychain> for PreV1WalletKeychain {
+    fn from(value: BdkPreV1WalletKeychain) -> Self {
+        let keychain = match value.keychain {
+            bdk_wallet::KeychainKind::External => KeychainKind::External,
+            bdk_wallet::KeychainKind::Internal => KeychainKind::Internal,
         };
-        Ok(Self {
+        Self {
             keychain,
             last_derivation_index: value.last_derivation_index,
-            checksum: value.checksum.to_hex_string(Case::Lower),
-        })
+            checksum: value.checksum,
+        }
     }
 }
 
