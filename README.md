@@ -17,22 +17,46 @@ Forked from [bitcoindevkit/bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) an
 | [`bdk-android/`](bdk-android/) | Kotlin/Android AAR (`org.litecoindevkit:bdk-ltc-android`) |
 | [`bdk-swift/`](bdk-swift/) | SwiftPM package `LitecoinDevKit` + xcframework scripts |
 
+## Blessed version matrix
+
+**Canonical pin table (source of truth):**  
+[`LitecoinDevKit/bdk` docs/ADOPTION.md § Blessed consumer pin](https://github.com/LitecoinDevKit/bdk/blob/litecoin/docs/ADOPTION.md#blessed-consumer-pin-this-phase--source-of-truth).  
+Update pins there first; this summary must not drift.
+
+| Component | Version | Role |
+| --- | --- | --- |
+| **This repo / UniFFI crate** | `3.1.0-litecoin.1` | Source of AAR + xcframework |
+| **Android AAR** (`bdk-ltc-android.aar`) | `3.1.0-litecoin.1` | [GitHub release asset](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.1) |
+| **xcframework zip** | `3.1.0-litecoin.1` | Same release |
+| **`ltc-swift` SwiftPM tag** | `3.1.0-litecoin.2` | Thin wrapper; binary target still points at `3.1.0-litecoin.1` |
+| **`bdk_wallet` (Rust)** | `3.1.0-litecoin.0` | Rev-pinned by this crate |
+| **Gradle `version` in-tree** | `3.1.0-litecoin.1-SNAPSHOT` | Local/dev publish only — **not** the consumer pin |
+
+**Blessed consumer pin for this phase:** Android apps use AAR **`3.1.0-litecoin.1`**; Swift apps use `ltc-swift` **exact `3.1.0-litecoin.2`**. Both resolve to the same `3.1.0-litecoin.1` binaries.
+
+Litecoin release notes: [`CHANGELOG-LITECOIN.md`](CHANGELOG-LITECOIN.md).  
+Cutting a release: [`docs/RELEASE_LADDER.md`](docs/RELEASE_LADDER.md).  
+Integrator overview + dogfood: [ADOPTION.md](https://github.com/LitecoinDevKit/bdk/blob/litecoin/docs/ADOPTION.md) · [DOGFOOD_CHECKLIST.md](https://github.com/LitecoinDevKit/bdk/blob/litecoin/docs/DOGFOOD_CHECKLIST.md).
+
 ## Using the bindings (no Rust required)
 
 Prebuilt artifacts are published on the [GitHub releases page](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.1):
 
-- **Android** — download `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
+- **Android (primary path)** — download `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
   `implementation(files("libs/bdk-ltc-android.aar"))` plus
   `implementation("net.java.dev.jna:jna:5.14.0@aar")`. Kotlin package: `org.litecoindevkit`.
+  Do **not** require Maven Central for Litecoin builds; the in-repo Gradle coordinate
+  `3.1.0-litecoin.1-SNAPSHOT` is for local `publishToMavenLocal` only.
 - **Swift** — add the SwiftPM package
   [`LitecoinDevKit/ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift)
-  (`.package(url: "https://github.com/LitecoinDevKit/ltc-swift", from: "3.1.0-litecoin.1")`).
+  (`.package(url: "https://github.com/LitecoinDevKit/ltc-swift", exact: "3.1.0-litecoin.2")`).
   The binary `bdkFFI.xcframework.zip` (iOS device + simulator + macOS) is hosted on the
   bdk-ffi release; `ltc-swift` is the thin Package.swift + generated bindings wrapper.
 
 Releases are produced by the [`Build Release Artifacts`](.github/workflows/release.yaml)
 workflow (`workflow_dispatch`), which builds the AAR, the xcframework zip, its SwiftPM
-checksum, and a ready-to-commit `Package.swift.release`.
+checksum, and a ready-to-commit `Package.swift.release`. Full checklist:
+[`docs/RELEASE_LADDER.md`](docs/RELEASE_LADDER.md).
 
 ## Building from source
 
@@ -121,16 +145,14 @@ let addr = try keys.receiveAddress(index: 0, network: .bitcoin)
 
 ## Cutting a release
 
-1. Run the `Build Release Artifacts` workflow with the version (e.g. `3.1.0-litecoin.0`).
-   It uploads the AAR, `bdkFFI.xcframework.zip`, the generated `LitecoinDevKit.swift`
-   bindings, and a `Package.swift.release` pre-filled with the asset URL and checksum,
-   and creates a draft GitHub release with the artifacts attached.
-2. Publish the draft release so the `bdkFFI.xcframework.zip` asset URL becomes public.
-3. For Swift consumers via SwiftPM URL: update
-   [`LitecoinDevKit/ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift) with
-   `Package.swift.release` (renamed to `Package.swift`) plus
-   `Sources/LitecoinDevKit/LitecoinDevKit.swift` from the workflow artifacts, and tag it
-   with the release version.
+See the full ladder in [`docs/RELEASE_LADDER.md`](docs/RELEASE_LADDER.md). Short form:
+
+1. Bump rev pins (`bdk` / `bdk_wallet`) in lockstep; run `scripts/check-rev-coherence.sh`.
+2. Run `Build Release Artifacts` (`workflow_dispatch`) with the version (e.g. `3.1.0-litecoin.1`).
+3. Publish the draft GitHub release.
+4. Update [`ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift) from workflow artifacts and tag.
+5. Bump smoke apps (`ltc-wallet-android` / `ltc-wallet-ios`) to the blessed pin.
+6. Append notes in [`CHANGELOG-LITECOIN.md`](CHANGELOG-LITECOIN.md).
 
 ## MWEB API (all languages)
 
