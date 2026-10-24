@@ -29,7 +29,7 @@ Update pins there first; this summary must not drift.
 | **Android AAR** (`bdk-ltc-android.aar`) | `3.1.0-litecoin.3` | [GitHub release asset](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.3) |
 | **xcframework zip** | `3.1.0-litecoin.3` | Same release |
 | **`ltc-swift` SwiftPM tag** | `3.1.0-litecoin.3` | Thin wrapper over the `3.1.0-litecoin.3` xcframework (tags re-synced at `.3`) |
-| **`bdk_wallet` (Rust)** | `3.1.0-litecoin.0` | Rev-pinned by this crate |
+| **`bdk_wallet` (Rust)** | `3.2.0-litecoin.0` | Rev-pinned by this crate on `litecoin-mweb`; the `3.1.0-litecoin.3` binaries above were built against `3.1.0-litecoin.0` |
 | **Gradle `version` in-tree** | `3.1.0-litecoin.3-SNAPSHOT` | Local/dev publish only — **not** the consumer pin |
 
 **Blessed consumer pin for this phase:** Android apps use AAR **`3.1.0-litecoin.3`**; Swift apps use `ltc-swift` **exact `3.1.0-litecoin.3`**. Both resolve to the same `3.1.0-litecoin.3` binaries.
