@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "org.litecoindevkit"
-version = "3.1.0-litecoin.3-SNAPSHOT"
+version = "3.2.0-litecoin.0-SNAPSHOT"
 
 android {
     namespace = group.toString()

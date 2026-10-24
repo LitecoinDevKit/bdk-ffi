@@ -2,7 +2,7 @@ name: Test Swift
 
 # Builds the Swift bindings for the Litecoin bdk-ffi fork on macOS:
 # compiles the Rust libraries for all Apple targets, assembles the
-# bdkFFI.xcframework, and runs the Swift package tests.
+# bdkffi.xcframework, and runs the Swift package tests.
 
 on:
   workflow_dispatch:
@@ -26,14 +26,15 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: "Set up Rust"
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           cache: false
+          rustflags: "-D warnings"
 
       - name: "Build Swift package"
         working-directory: bdk-swift

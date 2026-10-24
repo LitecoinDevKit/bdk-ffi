@@ -32,11 +32,16 @@ pub struct EsploraClient(BlockingClient);
 impl EsploraClient {
     /// Creates a new bdk client from an esplora_client::BlockingClient.
     /// Optional: Set the proxy of the builder.
-    #[uniffi::constructor(default(proxy = None))]
-    pub fn new(url: String, proxy: Option<String>) -> Self {
+    /// Optional: Set the timeout (in seconds) of the builder. When unset, no timeout is
+    /// configured and a request can block indefinitely if the server stops responding.
+    #[uniffi::constructor(default(proxy = None, timeout = None))]
+    pub fn new(url: String, proxy: Option<String>, timeout: Option<u64>) -> Self {
         let mut builder = Builder::new(url.as_str());
         if let Some(proxy) = proxy {
             builder = builder.proxy(proxy.as_str());
+        }
+        if let Some(timeout) = timeout {
+            builder = builder.timeout(timeout);
         }
         Self(builder.build_blocking())
     }
@@ -63,20 +68,8 @@ impl EsploraClient {
             .ok_or(EsploraError::RequestAlreadyConsumed)?;
 
         let result: BdkFullScanResponse<KeychainKind> =
-            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                self.0
-                    .full_scan(request, stop_gap as usize, parallel_requests as usize)
-            }))
-            .map_err(|payload| {
-                let error_message = payload
-                    .downcast_ref::<String>()
-                    .map(String::as_str)
-                    .or_else(|| payload.downcast_ref::<&str>().copied())
-                    .unwrap_or("panic in esplora client")
-                    .to_string();
-
-                EsploraError::Parsing { error_message }
-            })??;
+            self.0
+                .full_scan(request, stop_gap as usize, parallel_requests as usize)?;
 
         let update = BdkUpdate {
             last_active_indices: result.last_active_indices,
@@ -105,20 +98,7 @@ impl EsploraClient {
             .take()
             .ok_or(EsploraError::RequestAlreadyConsumed)?;
 
-        let result: BdkSyncResponse =
-            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                self.0.sync(request, parallel_requests as usize)
-            }))
-            .map_err(|payload| {
-                let error_message = payload
-                    .downcast_ref::<String>()
-                    .map(String::as_str)
-                    .or_else(|| payload.downcast_ref::<&str>().copied())
-                    .unwrap_or("panic in esplora client")
-                    .to_string();
-
-                EsploraError::Parsing { error_message }
-            })??;
+        let result: BdkSyncResponse = self.0.sync(request, parallel_requests as usize)?;
 
         let update = BdkUpdate {
             last_active_indices: BTreeMap::default(),
