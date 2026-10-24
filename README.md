@@ -25,14 +25,14 @@ Update pins there first; this summary must not drift.
 
 | Component | Version | Role |
 | --- | --- | --- |
-| **This repo / UniFFI crate** | `3.1.0-litecoin.1` | Source of AAR + xcframework |
-| **Android AAR** (`bdk-ltc-android.aar`) | `3.1.0-litecoin.1` | [GitHub release asset](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.1) |
-| **xcframework zip** | `3.1.0-litecoin.1` | Same release |
-| **`ltc-swift` SwiftPM tag** | `3.1.0-litecoin.2` | Thin wrapper; binary target still points at `3.1.0-litecoin.1` |
+| **This repo / UniFFI crate** | `3.1.0-litecoin.3` | Source of AAR + xcframework |
+| **Android AAR** (`bdk-ltc-android.aar`) | `3.1.0-litecoin.3` | [GitHub release asset](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.3) |
+| **xcframework zip** | `3.1.0-litecoin.3` | Same release |
+| **`ltc-swift` SwiftPM tag** | `3.1.0-litecoin.3` | Thin wrapper over the `3.1.0-litecoin.3` xcframework (tags re-synced at `.3`) |
 | **`bdk_wallet` (Rust)** | `3.1.0-litecoin.0` | Rev-pinned by this crate |
-| **Gradle `version` in-tree** | `3.1.0-litecoin.1-SNAPSHOT` | Local/dev publish only — **not** the consumer pin |
+| **Gradle `version` in-tree** | `3.1.0-litecoin.3-SNAPSHOT` | Local/dev publish only — **not** the consumer pin |
 
-**Blessed consumer pin for this phase:** Android apps use AAR **`3.1.0-litecoin.1`**; Swift apps use `ltc-swift` **exact `3.1.0-litecoin.2`**. Both resolve to the same `3.1.0-litecoin.1` binaries.
+**Blessed consumer pin for this phase:** Android apps use AAR **`3.1.0-litecoin.3`**; Swift apps use `ltc-swift` **exact `3.1.0-litecoin.3`**. Both resolve to the same `3.1.0-litecoin.3` binaries.
 
 Litecoin release notes: [`CHANGELOG-LITECOIN.md`](CHANGELOG-LITECOIN.md).  
 Cutting a release: [`docs/RELEASE_LADDER.md`](docs/RELEASE_LADDER.md).  
@@ -40,16 +40,16 @@ Integrator overview + dogfood: [ADOPTION.md](https://github.com/LitecoinDevKit/b
 
 ## Using the bindings (no Rust required)
 
-Prebuilt artifacts are published on the [GitHub releases page](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.1):
+Prebuilt artifacts are published on the [GitHub releases page](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.3):
 
 - **Android (primary path)** — download `bdk-ltc-android.aar`. Drop it into your app's `libs/` and add
   `implementation(files("libs/bdk-ltc-android.aar"))` plus
   `implementation("net.java.dev.jna:jna:5.14.0@aar")`. Kotlin package: `org.litecoindevkit`.
   Do **not** require Maven Central for Litecoin builds; the in-repo Gradle coordinate
-  `3.1.0-litecoin.1-SNAPSHOT` is for local `publishToMavenLocal` only.
+  `3.1.0-litecoin.3-SNAPSHOT` is for local `publishToMavenLocal` only.
 - **Swift** — add the SwiftPM package
   [`LitecoinDevKit/ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift)
-  (`.package(url: "https://github.com/LitecoinDevKit/ltc-swift", exact: "3.1.0-litecoin.2")`).
+  (`.package(url: "https://github.com/LitecoinDevKit/ltc-swift", exact: "3.1.0-litecoin.3")`).
   The binary `bdkFFI.xcframework.zip` (iOS device + simulator + macOS) is hosted on the
   bdk-ffi release; `ltc-swift` is the thin Package.swift + generated bindings wrapper.
 
@@ -148,7 +148,7 @@ let addr = try keys.receiveAddress(index: 0, network: .bitcoin)
 See the full ladder in [`docs/RELEASE_LADDER.md`](docs/RELEASE_LADDER.md). Short form:
 
 1. Bump rev pins (`bdk` / `bdk_wallet`) in lockstep; run `scripts/check-rev-coherence.sh`.
-2. Run `Build Release Artifacts` (`workflow_dispatch`) with the version (e.g. `3.1.0-litecoin.1`).
+2. Run `Build Release Artifacts` (`workflow_dispatch`) with the version (e.g. `3.1.0-litecoin.3`).
 3. Publish the draft GitHub release.
 4. Update [`ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift) from workflow artifacts and tag.
 5. Bump smoke apps (`ltc-wallet-android` / `ltc-wallet-ios`) to the blessed pin.
