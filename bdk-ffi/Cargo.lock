@@ -148,7 +148,7 @@ dependencies = [
 [[package]]
 name = "bdk_chain"
 version = "0.23.2"
-source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=85eb2a996fbc2569746497b2ad87aff3704f06ca#85eb2a996fbc2569746497b2ad87aff3704f06ca"
+source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=315f4e5b698b9468722a046b4244a15e5c58bbb5#315f4e5b698b9468722a046b4244a15e5c58bbb5"
 dependencies = [
  "bdk_core",
  "litecoin",
@@ -160,7 +160,7 @@ dependencies = [
 [[package]]
 name = "bdk_core"
 version = "0.6.2"
-source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=85eb2a996fbc2569746497b2ad87aff3704f06ca#85eb2a996fbc2569746497b2ad87aff3704f06ca"
+source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=315f4e5b698b9468722a046b4244a15e5c58bbb5#315f4e5b698b9468722a046b4244a15e5c58bbb5"
 dependencies = [
  "hashbrown 0.14.5",
  "litecoin",
@@ -170,7 +170,7 @@ dependencies = [
 [[package]]
 name = "bdk_electrum"
 version = "0.23.2"
-source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=85eb2a996fbc2569746497b2ad87aff3704f06ca#85eb2a996fbc2569746497b2ad87aff3704f06ca"
+source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=315f4e5b698b9468722a046b4244a15e5c58bbb5#315f4e5b698b9468722a046b4244a15e5c58bbb5"
 dependencies = [
  "bdk_core",
  "electrum-client",
@@ -179,7 +179,7 @@ dependencies = [
 [[package]]
 name = "bdk_esplora"
 version = "0.22.1"
-source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=85eb2a996fbc2569746497b2ad87aff3704f06ca#85eb2a996fbc2569746497b2ad87aff3704f06ca"
+source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=315f4e5b698b9468722a046b4244a15e5c58bbb5#315f4e5b698b9468722a046b4244a15e5c58bbb5"
 dependencies = [
  "bdk_core",
  "esplora-client",
@@ -189,7 +189,7 @@ dependencies = [
 [[package]]
 name = "bdk_mweb"
 version = "0.1.0"
-source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=85eb2a996fbc2569746497b2ad87aff3704f06ca#85eb2a996fbc2569746497b2ad87aff3704f06ca"
+source = "git+https://github.com/LitecoinDevKit/bdk.git?rev=315f4e5b698b9468722a046b4244a15e5c58bbb5#315f4e5b698b9468722a046b4244a15e5c58bbb5"
 dependencies = [
  "bdk_core",
  "blake3",
@@ -206,7 +206,7 @@ dependencies = [
 [[package]]
 name = "bdk_wallet"
 version = "3.1.0-litecoin.0"
-source = "git+https://github.com/LitecoinDevKit/bdk_wallet.git?rev=c0c26dafeea11160f42fce2faf164101191c3912#c0c26dafeea11160f42fce2faf164101191c3912"
+source = "git+https://github.com/LitecoinDevKit/bdk_wallet.git?rev=29779dcbf2f981489778b5b076d4350e3f989c6c#29779dcbf2f981489778b5b076d4350e3f989c6c"
 dependencies = [
  "bdk_chain",
  "bdk_mweb",
@@ -741,7 +741,7 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 [[package]]
 name = "litecoin"
 version = "0.32.8-rc.2"
-source = "git+https://github.com/LitecoinDevKit/rust-litecoin.git?rev=0b3285337f3cc508a5549d245ce20d3b52418f3a#0b3285337f3cc508a5549d245ce20d3b52418f3a"
+source = "git+https://github.com/LitecoinDevKit/rust-litecoin.git?rev=5a0233712bdefc568fb45d71f42c028e196c4352#5a0233712bdefc568fb45d71f42c028e196c4352"
 dependencies = [
  "base58ck",
  "base64 0.21.7",
