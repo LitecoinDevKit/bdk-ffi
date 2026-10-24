@@ -50,9 +50,10 @@ impl Mnemonic {
             .map_err(Bip39Error::from)
     }
 
-    /// Construct a mnemonic given an array of bytes. Note that using weak entropy will result in a loss
-    /// of funds. To ensure the entropy is generated properly, read about your operating
-    /// system specific ways to generate secure random numbers.
+    /// Construct a mnemonic from caller-provided entropy.
+    ///
+    /// This function does not generate entropy. Callers must provide cryptographically secure
+    /// entropy; weak entropy can result in loss of funds.
     #[uniffi::constructor]
     pub fn from_entropy(entropy: Vec<u8>) -> Result<Self, Bip39Error> {
         BdkMnemonic::from_entropy(entropy.as_slice())
@@ -172,19 +173,28 @@ impl DescriptorSecretKey {
     }
 
     /// Derive a descriptor secret key at a given derivation path.
+    ///
+    /// Any derivation path already recorded on this key (for example from `extend()` or from
+    /// parsing a key such as `xprv.../84h/1h/0h`) is applied first, so the result is the key at
+    /// `<existing path>/<path>`.
     pub fn derive(&self, path: &DerivationPath) -> Result<Arc<Self>, DescriptorKeyError> {
         let secp = Secp256k1::new();
         let descriptor_secret_key = &self.0;
         match descriptor_secret_key {
             BdkDescriptorSecretKey::Single(_) => Err(DescriptorKeyError::InvalidKeyType),
             BdkDescriptorSecretKey::XPrv(descriptor_x_key) => {
+                // Apply any derivation path already recorded on the key (from `extend()` or
+                // `from_string()`) before the requested path, so it is not silently discarded.
+                let full_path = descriptor_x_key.derivation_path.extend(&path.0);
                 let derived_xprv = descriptor_x_key
                     .xkey
-                    .derive_priv(&secp, &path.0)
+                    .derive_priv(&secp, &full_path)
                     .map_err(DescriptorKeyError::from)?;
                 let key_source = match descriptor_x_key.origin.clone() {
-                    Some((fingerprint, origin_path)) => (fingerprint, origin_path.extend(&path.0)),
-                    None => (descriptor_x_key.xkey.fingerprint(&secp), path.0.clone()),
+                    Some((fingerprint, origin_path)) => {
+                        (fingerprint, origin_path.extend(&full_path))
+                    }
+                    None => (descriptor_x_key.xkey.fingerprint(&secp), full_path),
                 };
                 let derived_descriptor_secret_key = BdkDescriptorSecretKey::XPrv(DescriptorXKey {
                     origin: Some(key_source),
@@ -272,20 +282,31 @@ impl DescriptorSecretKey {
     }
 
     /// Return the bytes of this descriptor secret key.
+    ///
+    /// For an extended private key, the key is derived along the derivation path it carries
+    /// before its bytes are returned.
+    ///
+    /// A key carrying a wildcard (`*` or `*h`) or a multipath key (one with a step such as
+    /// `<0;1>`) names a family of keys rather than a single key, so an empty vector is returned
+    /// for it. An empty vector is also returned if the derivation would exceed the maximum BIP-32
+    /// depth.
     pub fn secret_bytes(&self) -> Vec<u8> {
+        let secp = Secp256k1::new();
         let inner = &self.0;
         let secret_bytes: Vec<u8> = match inner {
             BdkDescriptorSecretKey::Single(single_key) => {
                 single_key.key.inner.secret_bytes().to_vec()
             }
-            BdkDescriptorSecretKey::XPrv(descriptor_x_key) => {
-                descriptor_x_key.xkey.private_key.secret_bytes().to_vec()
+            BdkDescriptorSecretKey::XPrv(descriptor_x_key)
+                if descriptor_x_key.wildcard == Wildcard::None =>
+            {
+                descriptor_x_key
+                    .xkey
+                    .derive_priv(&secp, &descriptor_x_key.derivation_path)
+                    .map(|derived| derived.private_key.secret_bytes().to_vec())
+                    .unwrap_or_default()
             }
-            BdkDescriptorSecretKey::MultiXPrv(descriptor_multi_x_key) => descriptor_multi_x_key
-                .xkey
-                .private_key
-                .secret_bytes()
-                .to_vec(),
+            BdkDescriptorSecretKey::XPrv(_) | BdkDescriptorSecretKey::MultiXPrv(_) => Vec::new(),
         };
 
         secret_bytes
@@ -314,19 +335,28 @@ impl DescriptorPublicKey {
     }
 
     /// Derive the descriptor public key at the given derivation path.
+    ///
+    /// Any derivation path already recorded on this key (for example from `extend()` or from
+    /// parsing a key such as `xpub.../0`) is applied first, so the result is the key at
+    /// `<existing path>/<path>`.
     pub fn derive(&self, path: &DerivationPath) -> Result<Arc<Self>, DescriptorKeyError> {
         let secp = Secp256k1::new();
         let descriptor_public_key = &self.0;
         match descriptor_public_key {
             BdkDescriptorPublicKey::Single(_) => Err(DescriptorKeyError::InvalidKeyType),
             BdkDescriptorPublicKey::XPub(descriptor_x_key) => {
+                // Apply any derivation path already recorded on the key (from `extend()` or
+                // `from_string()`) before the requested path, so it is not silently discarded.
+                let full_path = descriptor_x_key.derivation_path.extend(&path.0);
                 let derived_xpub = descriptor_x_key
                     .xkey
-                    .derive_pub(&secp, &path.0)
+                    .derive_pub(&secp, &full_path)
                     .map_err(DescriptorKeyError::from)?;
                 let key_source = match descriptor_x_key.origin.clone() {
-                    Some((fingerprint, origin_path)) => (fingerprint, origin_path.extend(&path.0)),
-                    None => (descriptor_x_key.xkey.fingerprint(), path.0.clone()),
+                    Some((fingerprint, origin_path)) => {
+                        (fingerprint, origin_path.extend(&full_path))
+                    }
+                    None => (descriptor_x_key.xkey.fingerprint(), full_path),
                 };
                 let derived_descriptor_public_key = BdkDescriptorPublicKey::XPub(DescriptorXKey {
                     origin: Some(key_source),

@@ -1,5 +1,16 @@
-use crate::bitcoin::{Address, AddressData, Key, Network, ProprietaryKey, Psbt};
+use crate::bitcoin::{
+    Address, AddressData, FeeRate, Key, Network, ProprietaryKey, Psbt, Transaction,
+};
+use crate::error::TransactionError;
 use bdk_electrum::bdk_core::bitcoin::hex::DisplayHex;
+
+#[test]
+fn maximum_fee_rate_converts_and_displays_without_overflow() {
+    let fee_rate = FeeRate::from_sat_per_kwu(u64::MAX);
+
+    assert_eq!(fee_rate.to_sat_per_vb_ceil(), u64::MAX / 250 + 1);
+    assert_eq!(fee_rate.to_string(), "73786976294838207.00 sat/vbyte");
+}
 
 #[test]
 fn test_is_valid_for_network() {
@@ -75,6 +86,33 @@ fn test_to_address_data() {
     assert!(matches!(
         segwit.to_address_data(),
         AddressData::Segwit { .. }
+    ));
+}
+
+#[test]
+fn test_transaction_new_rejects_trailing_bytes() {
+    let transaction = bdk_wallet::bitcoin::Transaction {
+        version: bdk_wallet::bitcoin::transaction::Version::TWO,
+        lock_time: bdk_wallet::bitcoin::absolute::LockTime::ZERO,
+        input: vec![bdk_wallet::bitcoin::TxIn::default()],
+        output: vec![bdk_wallet::bitcoin::TxOut {
+            value: bdk_wallet::bitcoin::Amount::from_sat(50_000),
+            script_pubkey: bdk_wallet::bitcoin::ScriptBuf::new(),
+        }],
+        mw_tx: None,
+        is_hog_ex: false,
+    };
+    let transaction_bytes = bdk_wallet::bitcoin::consensus::serialize(&transaction);
+
+    let parsed_transaction = Transaction::new(transaction_bytes.clone()).unwrap();
+    assert_eq!(parsed_transaction.serialize(), transaction_bytes);
+
+    let mut transaction_bytes_with_trailing_garbage = transaction_bytes;
+    transaction_bytes_with_trailing_garbage.extend_from_slice(&[0xde, 0xad, 0xbe, 0xef]);
+
+    assert!(matches!(
+        Transaction::new(transaction_bytes_with_trailing_garbage),
+        Err(TransactionError::ParseFailed)
     ));
 }
 

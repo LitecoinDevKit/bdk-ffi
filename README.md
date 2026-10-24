@@ -25,12 +25,12 @@ Update pins there first; this summary must not drift.
 
 | Component | Version | Role |
 | --- | --- | --- |
-| **This repo / UniFFI crate** | `3.1.0-litecoin.3` | Source of AAR + xcframework |
+| **This repo / UniFFI crate** | `3.2.0-litecoin.0` (source, `litecoin-mweb`) | Source of the next AAR + xcframework; tracks upstream `bdk-ffi` master `ec61c0a` |
 | **Android AAR** (`bdk-ltc-android.aar`) | `3.1.0-litecoin.3` | [GitHub release asset](https://github.com/LitecoinDevKit/bdk-ffi/releases/tag/3.1.0-litecoin.3) |
 | **xcframework zip** | `3.1.0-litecoin.3` | Same release |
 | **`ltc-swift` SwiftPM tag** | `3.1.0-litecoin.3` | Thin wrapper over the `3.1.0-litecoin.3` xcframework (tags re-synced at `.3`) |
 | **`bdk_wallet` (Rust)** | `3.2.0-litecoin.0` | Rev-pinned by this crate on `litecoin-mweb`; the `3.1.0-litecoin.3` binaries above were built against `3.1.0-litecoin.0` |
-| **Gradle `version` in-tree** | `3.1.0-litecoin.3-SNAPSHOT` | Local/dev publish only — **not** the consumer pin |
+| **Gradle `version` in-tree** | `3.2.0-litecoin.0-SNAPSHOT` | Local/dev publish only — **not** the consumer pin |
 
 **Blessed consumer pin for this phase:** Android apps use AAR **`3.1.0-litecoin.3`**; Swift apps use `ltc-swift` **exact `3.1.0-litecoin.3`**. Both resolve to the same `3.1.0-litecoin.3` binaries.
 
@@ -133,7 +133,7 @@ bash ./build-xcframework.sh
 swift test
 ```
 
-`Package.swift` in this repo points at the locally built `./bdkFFI.xcframework`, so after
+`Package.swift` in this repo points at the locally built `./bdkffi.xcframework`, so after
 running a build script you can depend on the `bdk-swift` directory as a local SwiftPM package.
 
 ```swift
@@ -142,6 +142,12 @@ import LitecoinDevKit
 let keys = try MasterKeys.fromSeed(seed: seed, network: .bitcoin) // .bitcoin = Litecoin mainnet
 let addr = try keys.receiveAddress(index: 0, network: .bitcoin)
 ```
+
+## Security Policy
+
+To report a security issue, please refer to the [security policy](SECURITY.md). Issues
+specific to the Litecoin/MWEB surface can also be filed as a private advisory on this
+repository.
 
 ## Cutting a release
 

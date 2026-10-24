@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [],
     targets: [
         // Built locally via build-xcframework-dev.sh / build-xcframework.sh
-        .binaryTarget(name: "bdkFFI", path: "./bdkFFI.xcframework"),
+        .binaryTarget(name: "bdkFFI", path: "./bdkffi.xcframework"),
         .target(
             name: "LitecoinDevKit",
             dependencies: ["bdkFFI"]

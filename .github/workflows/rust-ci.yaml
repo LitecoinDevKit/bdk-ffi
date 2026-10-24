@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -34,9 +34,10 @@ jobs:
         run: bash ./scripts/check-rev-coherence.sh
 
       - name: "Set up Rust"
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           cache: false
+          rustflags: "-D warnings"
 
       - name: "Build"
         working-directory: bdk-ffi
@@ -53,13 +54,14 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           cache: false
+          rustflags: "-D warnings"
           components: clippy, rustfmt
 
       - name: "Check fmt"
@@ -68,4 +70,4 @@ jobs:
 
       - name: "Check clippy"
         working-directory: bdk-ffi
-        run: cargo clippy --all-targets
+        run: cargo clippy --locked --all-targets

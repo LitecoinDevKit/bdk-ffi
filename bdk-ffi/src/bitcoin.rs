@@ -14,10 +14,8 @@ use bdk_wallet::bitcoin::blockdata::block::Block as BdkBlock;
 use bdk_wallet::bitcoin::blockdata::block::Header as BdkHeader;
 use bdk_wallet::bitcoin::consensus::encode::deserialize;
 use bdk_wallet::bitcoin::consensus::encode::serialize;
-use bdk_wallet::bitcoin::consensus::Decodable;
 use bdk_wallet::bitcoin::hashes::sha256::Hash as BitcoinSha256Hash;
 use bdk_wallet::bitcoin::hashes::sha256d::Hash as BitcoinDoubleSha256Hash;
-use bdk_wallet::bitcoin::io::Cursor;
 use bdk_wallet::bitcoin::psbt::Input as BdkInput;
 use bdk_wallet::bitcoin::psbt::Output as BdkOutput;
 use bdk_wallet::bitcoin::secp256k1::Secp256k1;
@@ -166,7 +164,7 @@ impl FeeRate {
 
     /// Converts to sat/vB rounding up.
     pub fn to_sat_per_vb_ceil(&self) -> u64 {
-        self.0.to_sat_per_vb_ceil()
+        self.0.to_sat_per_kwu().div_ceil(250)
     }
 
     /// Converts to sat/vB rounding down.
@@ -206,7 +204,7 @@ impl FeeRate {
 
 impl Display for FeeRate {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:#}", self.0)
+        write!(f, "{}.00 sat/vbyte", self.to_sat_per_vb_ceil())
     }
 }
 
@@ -444,8 +442,7 @@ impl Transaction {
     /// Creates a new `Transaction` instance from serialized transaction bytes.
     #[uniffi::constructor]
     pub fn new(transaction_bytes: Vec<u8>) -> Result<Self, TransactionError> {
-        let mut decoder = Cursor::new(transaction_bytes);
-        let tx: BdkTransaction = BdkTransaction::consensus_decode(&mut decoder)?;
+        let tx: BdkTransaction = deserialize(&transaction_bytes)?;
         Ok(Transaction(tx))
     }
 
@@ -1447,6 +1444,38 @@ impl Psbt {
         let tx: BdkTransaction = self.0.lock().unwrap().clone().extract_tx()?;
         let transaction: Transaction = tx.into();
         Ok(Arc::new(transaction))
+    }
+
+    /// Extracts the `Transaction` from a `Psbt` by filling in the available signature information.
+    ///
+    /// #### Errors
+    ///
+    /// See `extract_tx`.
+    pub fn extract_tx_with_fee_rate_limit(
+        &self,
+        max_fee_rate: Arc<FeeRate>,
+    ) -> Result<Arc<Transaction>, ExtractTxError> {
+        let tx: BdkTransaction = self
+            .0
+            .lock()
+            .unwrap()
+            .clone()
+            .extract_tx_with_fee_rate_limit(max_fee_rate.0)?;
+        let transaction: Transaction = tx.into();
+        Ok(Arc::new(transaction))
+    }
+
+    /// Perform `extract_tx` without the fee rate check.
+    ///
+    /// This can result in a transaction with absurdly high fees. Use with caution.
+    pub fn extract_tx_unchecked_fee_rate(&self) -> Arc<Transaction> {
+        let tx: BdkTransaction = self
+            .0
+            .lock()
+            .unwrap()
+            .clone()
+            .extract_tx_unchecked_fee_rate();
+        Arc::new(tx.into())
     }
 
     /// Calculates transaction fee.

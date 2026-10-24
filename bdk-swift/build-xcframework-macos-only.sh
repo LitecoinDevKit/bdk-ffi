@@ -7,7 +7,7 @@ set -euo pipefail
 HEADER_BASENAME="LitecoinDevKitFFI"
 TARGETDIR="../bdk-ffi/target"
 OUTDIR="."
-NAME="bdkFFI"
+NAME="bdkffi"
 STATIC_LIB_NAME="libbdkffi.a"
 NEW_HEADER_DIR="../bdk-ffi/target/include"
 PROFILE_DIR="debug"

@@ -3,7 +3,7 @@
 
 [package]
 name = "bdk-ffi"
-version = "3.1.0-litecoin.3"
+version = "3.2.0-litecoin.0"
 homepage = "https://bitcoindevkit.org"
 repository = "https://github.com/LitecoinDevKit/bdk-ffi"
 edition = "2018"
