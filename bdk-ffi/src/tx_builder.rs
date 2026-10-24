@@ -586,6 +586,9 @@ impl TxBuilder {
 }
 
 impl TxBuilder {
+    // `TxBuilder::policy_path` is deprecated upstream (3.2.0) in favour of `set_condition`;
+    // the FFI surface still exposes policy paths, so keep forwarding them.
+    #[allow(deprecated)]
     fn finish_with_builder<Cs>(
         &self,
         mut tx_builder: bdk_wallet::TxBuilder<'_, Cs>,

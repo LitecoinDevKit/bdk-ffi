@@ -24,7 +24,7 @@ path = "uniffi-bindgen.rs"
 # otherwise Cargo builds two copies of bdk_chain/bdk_mweb and types stop
 # unifying. For local development, add [patch] overrides in .cargo/config.toml
 # pointing at sibling checkouts (see README).
-bdk_wallet = { git = "https://github.com/LitecoinDevKit/bdk_wallet.git", rev = "f13078271e5275942ab119323d2075bec5bf66e5", version = "=3.1.0-litecoin.0", features = ["all-keys", "keys-bip39", "rusqlite", "mweb", "mweb-sqlite"] }
+bdk_wallet = { git = "https://github.com/LitecoinDevKit/bdk_wallet.git", rev = "7618a092a54da0036125b5b4bb68ba69f04dce3e", version = "=3.2.0-litecoin.0", features = ["all-keys", "keys-bip39", "rusqlite", "mweb", "mweb-sqlite"] }
 bdk_esplora = { git = "https://github.com/LitecoinDevKit/bdk.git", rev = "2deac37e989624e034620febb658b09811ed1d24", version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls"] }
 bdk_electrum = { git = "https://github.com/LitecoinDevKit/bdk.git", rev = "2deac37e989624e034620febb658b09811ed1d24", version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
 bdk_mweb = { git = "https://github.com/LitecoinDevKit/bdk.git", rev = "2deac37e989624e034620febb658b09811ed1d24", version = "0.1.0", default-features = false, features = ["std", "zkp", "persist", "rusqlite", "lip0006"] }
