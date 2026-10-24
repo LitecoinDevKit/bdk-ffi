@@ -55,7 +55,9 @@ In [`LitecoinDevKit/ltc-swift`](https://github.com/LitecoinDevKit/ltc-swift):
 
 1. Replace `Package.swift` with workflow `Package.swift.release`
 2. Replace `Sources/LitecoinDevKit/LitecoinDevKit.swift`
-3. Tag — either the same as the binary (`3.1.0-litecoin.1`) or a wrapper bump (e.g. `.2` for URL-only changes) that still points at the `.1` zip
+3. Tag — the same number as the binary. (A wrapper-only bump happened once: `ltc-swift` `.2`
+   pointed at the `.1` zip. The binary skipped `.2` so both tags re-synced at `.3`; keep them
+   in lockstep from here on.)
 4. Push tag
 
 ## 6. Bump smoke / reference consumers
@@ -90,4 +92,11 @@ Full `workflow_dispatch` creates a **draft** release; only run when intentionall
 new artifacts are needed.
 
 **Blessed pin at dry-run time:** AAR/xcframework `3.1.0-litecoin.1`, `ltc-swift` `3.1.0-litecoin.2`,
+`bdk_wallet` `3.1.0-litecoin.0`.
+
+## Release notes (2026-10-24, `3.1.0-litecoin.3`)
+
+Full ladder run from `bdk-ffi` `ddf70619` (`bdk_wallet` `f1307827` / `bdk` `2deac37e`).
+`release.yaml` needed `android-actions/setup-android@v4` (same breakage `test-android` hit).
+Current blessed pin: AAR/xcframework `3.1.0-litecoin.3`, `ltc-swift` `3.1.0-litecoin.3`,
 `bdk_wallet` `3.1.0-litecoin.0`.
